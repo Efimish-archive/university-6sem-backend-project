@@ -87,11 +87,13 @@ export const customerCars = sqliteTable("customer_cars", {
   carId: int()
     .references(() => cars.id)
     .notNull(),
-  customerId: int(),
+  customerId: int()
+    .references(() => users.id)
+    .notNull(),
   /** Год выпуска */
-  year: int(),
+  year: int().notNull(),
   /** Номер машины */
-  number: text(),
+  number: text().notNull(),
 });
 
 export const customerCarsRelations = relations(customerCars, ({ one }) => ({
@@ -141,7 +143,7 @@ export const orders = sqliteTable("orders", {
   startDate: int({ mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),
-  endDate: int({ mode: "timestamp" }).notNull(),
+  endDate: int({ mode: "timestamp" }),
 });
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
