@@ -1,23 +1,17 @@
 import { Elysia } from "elysia";
-import { z } from "zod";
-import { HttpUserPostBodySchema, HttpItemResponseSchema } from "./users.model";
+import { HttpUserPostBodySchema, HttpItemResponseSchema, HttpUsersQuerySchema } from "./users.model";
 import { UsersServiceSingleton } from "./users.service";
 import { context } from "@/context";
-
-const ParamsSchema = z.object({
-  id: z.coerce.number(),
-});
+import { AuthServiceSingleton } from "@/api/shared/auth.service";
+import { AuthHeadersSchema, IdParamsSchema } from "@/api/shared/http.model";
 
 export const usersController = new Elysia({ prefix: "users" })
   .use(context)
   .get(
     "",
-    async () => {
-      const users = await UsersServiceSingleton.findAll();
-      return users;
-    },
+    async ({ query }) => UsersServiceSingleton.findAll(query),
     {
-      response: { 200: HttpItemResponseSchema.array() },
+      query: HttpUsersQuerySchema,
     },
   )
   .get(
@@ -27,7 +21,7 @@ export const usersController = new Elysia({ prefix: "users" })
       return user;
     },
     {
-      params: ParamsSchema,
+      params: IdParamsSchema,
       response: {
         200: HttpItemResponseSchema,
         404: "error",
@@ -36,44 +30,47 @@ export const usersController = new Elysia({ prefix: "users" })
   )
   .post(
     "",
-    async ({ body }) => {
-      const user = await UsersServiceSingleton.create(body);
+    async ({ body, headers }) => {
+      const currentUser = await AuthServiceSingleton.getCurrentUser(headers["x-user-id"]);
+      const user = await UsersServiceSingleton.create(currentUser, body);
       return user;
     },
     {
+      headers: AuthHeadersSchema,
       body: HttpUserPostBodySchema,
       response: { 200: HttpItemResponseSchema },
-      authAdmin: true,
     },
   )
   .put(
     "/:id",
-    async ({ params: { id }, body }) => {
-      const user = await UsersServiceSingleton.update(id, body);
+    async ({ params: { id }, body, headers }) => {
+      const currentUser = await AuthServiceSingleton.getCurrentUser(headers["x-user-id"]);
+      const user = await UsersServiceSingleton.update(currentUser, id, body);
       return user;
     },
     {
-      params: ParamsSchema,
-      body: HttpUserPostBodySchema,
+      headers: AuthHeadersSchema,
+      params: IdParamsSchema,
+      body: HttpUserPostBodySchema.partial(),
       response: {
         200: HttpItemResponseSchema,
         404: "error",
       },
-      authAdmin: true,
     },
   )
   .delete(
     "/:id",
-    async ({ params: { id } }) => {
-      const user = await UsersServiceSingleton.delete(id);
+    async ({ params: { id }, headers }) => {
+      const currentUser = await AuthServiceSingleton.getCurrentUser(headers["x-user-id"]);
+      const user = await UsersServiceSingleton.delete(currentUser, id);
       return user;
     },
     {
-      params: ParamsSchema,
+      headers: AuthHeadersSchema,
+      params: IdParamsSchema,
       response: {
         200: HttpItemResponseSchema,
         404: "error",
       },
-      authAdmin: true,
     },
   );

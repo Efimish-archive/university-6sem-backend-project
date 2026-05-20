@@ -23,6 +23,7 @@ export const context = new Elysia({ name: "context" })
   .model({
     error: z.object({
       error: z.string(),
+      code: z.number().optional(),
     }),
     message: z.object({
       message: z.string(),
