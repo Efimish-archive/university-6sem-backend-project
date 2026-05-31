@@ -68,16 +68,20 @@ console.log("[✓] Созданы фейковые автомобили");
 
 const services = await db
   .insert(schema.services)
-  .values(
-    fakerRU.helpers.uniqueArray(
-      () => ({
-        name: fakerRU.word.words(5),
-        price: fakerRU.number.int({ min: 10000, max: 150000 }),
-        time: fakerRU.number.int({ min: 600, max: 5400 }),
-      }),
-      150,
-    ),
-  )
+  .values([
+    { name: "Экспресс-мойка кузова", price: 45000, time: 1200 },
+    { name: "Комплексная мойка", price: 90000, time: 2700 },
+    { name: "Мойка салона", price: 70000, time: 2400 },
+    { name: "Химчистка салона", price: 250000, time: 7200 },
+    { name: "Мойка стекол", price: 25000, time: 600 },
+    { name: "Чернение шин", price: 20000, time: 600 },
+    { name: "Полировка кузова", price: 350000, time: 10800 },
+    { name: "Нанесение воска", price: 80000, time: 1800 },
+    { name: "Мойка двигателя", price: 120000, time: 2400 },
+    { name: "Сушка и продувка", price: 30000, time: 900 },
+    { name: "Антидождь", price: 60000, time: 1200 },
+    { name: "Удаление битума", price: 100000, time: 2100 },
+  ])
   .returning();
 console.log("[✓] Созданы фейковые услуги");
 
@@ -97,34 +101,39 @@ const customerCars = await db
   .returning();
 console.log("[✓] Созданы фейковые автомобили клиентов");
 
-const orders = await db
-  .insert(schema.orders)
-  .values(
-    fakerRU.helpers.uniqueArray(
-      () => ({
-        administratorId: fakerRU.helpers.arrayElement(adminUsers).id,
-        customerCarId: fakerRU.helpers.arrayElement(customerCars).id,
-        employeeId: fakerRU.helpers.arrayElement(employeeUsers).id,
-        status: 1,
-        startDate: fakerRU.date.recent(),
-        endDate: fakerRU.date.soon(),
-      }),
-      50,
-    ),
-  )
-  .returning();
-console.log("[✓] Созданы фейковые заказы");
+for (let i = 0; i < 50; i++) {
+  const selectedServices = fakerRU.helpers
+    .shuffle(services)
+    .slice(0, fakerRU.number.int({ min: 1, max: 4 }));
+  const totalSeconds = selectedServices.reduce(
+    (sum, service) => sum + service.time,
+    0,
+  );
+  const status = fakerRU.helpers.arrayElement([1, 1, 1, 2]);
+  const startedMinutesAgo = fakerRU.number.int({
+    min: status === 2 ? 180 : 15,
+    max: status === 2 ? 60 * 24 * 14 : 240,
+  });
+  const startDate = new Date(Date.now() - startedMinutesAgo * 60 * 1000);
+  const endDate = new Date(startDate.getTime() + totalSeconds * 1000);
 
-const orderService = await db
-  .insert(schema.orderService)
-  .values(
-    fakerRU.helpers.uniqueArray(
-      () => ({
-        serviceId: fakerRU.helpers.arrayElement(services).id,
-        orderId: fakerRU.helpers.arrayElement(orders).id,
-      }),
-      30,
-    ),
-  )
-  .returning();
-console.log("[✓] Созданы фейковые связи заказ-услуга");
+  const [order] = await db
+    .insert(schema.orders)
+    .values({
+      administratorId: fakerRU.helpers.arrayElement(adminUsers).id,
+      customerCarId: fakerRU.helpers.arrayElement(customerCars).id,
+      employeeId: fakerRU.helpers.arrayElement(employeeUsers).id,
+      status,
+      startDate,
+      endDate,
+    })
+    .returning();
+
+  await db.insert(schema.orderService).values(
+    selectedServices.map((service) => ({
+      serviceId: service.id,
+      orderId: order.id,
+    })),
+  );
+}
+console.log("[✓] Созданы фейковые заказы и связи заказ-услуга");
