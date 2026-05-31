@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { schema } from "@/db";
+import { listResponseSchema } from "@/api/shared/http.model";
 
 export type RoleInsert = typeof schema.roles.$inferInsert;
 export type RoleSelect = typeof schema.roles.$inferSelect;
@@ -11,6 +12,10 @@ export const HttpRoleBodySchema = z.object({
 export const HttpRoleResponseSchema = HttpRoleBodySchema.extend({
   id: z.number().int(),
 });
+
+export const HttpRolesListResponseSchema = listResponseSchema(
+  HttpRoleResponseSchema,
+);
 
 export const HttpRolesQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),

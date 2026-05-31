@@ -1,5 +1,10 @@
 import { Elysia } from "elysia";
-import { HttpUserPostBodySchema, HttpItemResponseSchema, HttpUsersQuerySchema } from "./users.model";
+import {
+  HttpUserPostBodySchema,
+  HttpItemResponseSchema,
+  HttpUsersListResponseSchema,
+  HttpUsersQuerySchema,
+} from "./users.model";
 import { UsersServiceSingleton } from "./users.service";
 import { context } from "@/context";
 import { AuthServiceSingleton } from "@/api/shared/auth.service";
@@ -7,13 +12,12 @@ import { AuthHeadersSchema, IdParamsSchema } from "@/api/shared/http.model";
 
 export const usersController = new Elysia({ prefix: "users" })
   .use(context)
-  .get(
-    "",
-    async ({ query }) => UsersServiceSingleton.findAll(query),
-    {
-      query: HttpUsersQuerySchema,
+  .get("", async ({ query }) => UsersServiceSingleton.findAll(query), {
+    query: HttpUsersQuerySchema,
+    response: {
+      200: HttpUsersListResponseSchema,
     },
-  )
+  })
   .get(
     "/:id",
     async ({ params: { id } }) => {
@@ -31,20 +35,28 @@ export const usersController = new Elysia({ prefix: "users" })
   .post(
     "",
     async ({ body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(headers["x-user-id"]);
+      const currentUser = await AuthServiceSingleton.getCurrentUser(
+        headers["x-user-id"],
+      );
       const user = await UsersServiceSingleton.create(currentUser, body);
       return user;
     },
     {
       headers: AuthHeadersSchema,
       body: HttpUserPostBodySchema,
-      response: { 200: HttpItemResponseSchema },
+      response: {
+        200: HttpItemResponseSchema,
+        401: "error",
+        403: "error",
+      },
     },
   )
   .put(
     "/:id",
     async ({ params: { id }, body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(headers["x-user-id"]);
+      const currentUser = await AuthServiceSingleton.getCurrentUser(
+        headers["x-user-id"],
+      );
       const user = await UsersServiceSingleton.update(currentUser, id, body);
       return user;
     },
@@ -54,6 +66,8 @@ export const usersController = new Elysia({ prefix: "users" })
       body: HttpUserPostBodySchema.partial(),
       response: {
         200: HttpItemResponseSchema,
+        401: "error",
+        403: "error",
         404: "error",
       },
     },
@@ -61,7 +75,9 @@ export const usersController = new Elysia({ prefix: "users" })
   .delete(
     "/:id",
     async ({ params: { id }, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(headers["x-user-id"]);
+      const currentUser = await AuthServiceSingleton.getCurrentUser(
+        headers["x-user-id"],
+      );
       const user = await UsersServiceSingleton.delete(currentUser, id);
       return user;
     },
@@ -70,6 +86,8 @@ export const usersController = new Elysia({ prefix: "users" })
       params: IdParamsSchema,
       response: {
         200: HttpItemResponseSchema,
+        401: "error",
+        403: "error",
         404: "error",
       },
     },

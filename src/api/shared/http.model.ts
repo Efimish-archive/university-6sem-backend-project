@@ -45,6 +45,15 @@ export const listResponse = <T>(
   },
 });
 
+export const listResponseSchema = (itemSchema: z.ZodType) =>
+  z.object({
+    items: z.array(itemSchema),
+    meta: z.object({
+      page: z.number().int(),
+      limit: z.number().int(),
+    }),
+  });
+
 export const toHttpDate = (date: Date) => date.toISOString();
 
 export const toNullableHttpDate = (date: Date | null) =>

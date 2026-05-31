@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { schema } from "@/db";
+import { listResponseSchema } from "@/api/shared/http.model";
 
 export type ServiceSelect = typeof schema.services.$inferSelect;
 
@@ -22,6 +23,10 @@ export const HttpServiceResponseSchema = z.object({
     minute: z.number().int(),
   }),
 });
+
+export const HttpServicesListResponseSchema = listResponseSchema(
+  HttpServiceResponseSchema,
+);
 
 export const HttpServicesQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { schema } from "@/db";
-import { HttpDateSchema } from "@/api/shared/http.model";
+import { HttpDateSchema, listResponseSchema } from "@/api/shared/http.model";
 
 export type OrderSelect = typeof schema.orders.$inferSelect;
 
@@ -36,7 +36,14 @@ export const HttpOrdersQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).default(20),
   sortBy: z.enum(["id", "status", "startDate", "endDate"]).default("id"),
   sortOrder: z.enum(["asc", "desc"]).default("asc"),
-  status: z.coerce.number().int().optional(),
+  status: z.coerce
+    .number()
+    .int()
+    .refine(
+      (status) =>
+        status === ORDER_STATUS.inProgress || status === ORDER_STATUS.completed,
+    )
+    .optional(),
   employeeId: z.coerce.number().int().positive().optional(),
   customerId: z.coerce.number().int().positive().optional(),
 });
@@ -90,6 +97,10 @@ export const HttpOrderResponseSchema = z.object({
       .nullable(),
   }),
 });
+
+export const HttpOrdersListResponseSchema = listResponseSchema(
+  HttpOrderResponseSchema,
+);
 
 export type HttpOrderCreateBody = z.infer<typeof HttpOrderCreateBodySchema>;
 export type HttpOrderUpdateBody = z.infer<typeof HttpOrderUpdateBodySchema>;

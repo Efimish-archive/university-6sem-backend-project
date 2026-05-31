@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { schema } from "@/db";
+import { listResponseSchema } from "@/api/shared/http.model";
 
 export type BrandSelect = typeof schema.brands.$inferSelect;
 
@@ -10,6 +11,10 @@ export const HttpBrandBodySchema = z.object({
 export const HttpBrandResponseSchema = HttpBrandBodySchema.extend({
   id: z.number().int(),
 });
+
+export const HttpBrandsListResponseSchema = listResponseSchema(
+  HttpBrandResponseSchema,
+);
 
 export const HttpBrandsQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),

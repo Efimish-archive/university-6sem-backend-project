@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { schema } from "@/db";
+import { listResponseSchema } from "@/api/shared/http.model";
 
 export type CarSelect = typeof schema.cars.$inferSelect;
 
@@ -19,6 +20,10 @@ export const HttpCarResponseSchema = z.object({
     })
     .optional(),
 });
+
+export const HttpCarsListResponseSchema = listResponseSchema(
+  HttpCarResponseSchema,
+);
 
 export const HttpCarsQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),

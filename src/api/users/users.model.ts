@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { schema } from "@/db";
+import { listResponseSchema } from "@/api/shared/http.model";
 
 export type UserInsert = typeof schema.users.$inferInsert;
 export type UserSelect = typeof schema.users.$inferSelect;
@@ -25,6 +26,10 @@ export const HttpItemResponseSchema = HttpUserPostBodySchema.omit({
     }),
   ),
 });
+
+export const HttpUsersListResponseSchema = listResponseSchema(
+  HttpItemResponseSchema,
+);
 
 export const HttpUsersQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),

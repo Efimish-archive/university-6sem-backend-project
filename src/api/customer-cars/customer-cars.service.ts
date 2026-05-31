@@ -16,7 +16,8 @@ const fullName = (user: {
   firstName: string;
   lastName: string;
   patronymic: string | null;
-}) => [user.lastName, user.firstName, user.patronymic].filter(Boolean).join(" ");
+}) =>
+  [user.lastName, user.firstName, user.patronymic].filter(Boolean).join(" ");
 
 const toResponse = (
   item: CustomerCarSelect & {
@@ -53,9 +54,13 @@ class CustomerCarsService {
     const orderColumn = schema.customerCars[query.sortBy];
     const items = await db.query.customerCars.findMany({
       where: and(
-        query.customerId ? eq(schema.customerCars.customerId, query.customerId) : undefined,
+        query.customerId
+          ? eq(schema.customerCars.customerId, query.customerId)
+          : undefined,
         query.carId ? eq(schema.customerCars.carId, query.carId) : undefined,
-        query.number ? like(schema.customerCars.number, `%${query.number}%`) : undefined,
+        query.number
+          ? like(schema.customerCars.number, `%${query.number}%`)
+          : undefined,
       ),
       with: {
         customer: true,
@@ -65,7 +70,8 @@ class CustomerCarsService {
           },
         },
       },
-      orderBy: query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
+      orderBy:
+        query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
       limit,
       offset,
     });
@@ -89,23 +95,20 @@ class CustomerCarsService {
     return toResponse(item);
   }
 
-  async create(
-    currentUser: CurrentUser,
-    data: HttpCustomerCarBody,
-  ): Promise<CustomerCarSelect> {
+  async create(currentUser: CurrentUser, data: HttpCustomerCarBody) {
     AuthServiceSingleton.requireAdmin(currentUser);
     const [customerCar] = await db
       .insert(schema.customerCars)
       .values(data)
       .returning();
-    return customerCar;
+    return this.findById(customerCar.id);
   }
 
   async update(
     currentUser: CurrentUser,
     id: number,
     data: Partial<HttpCustomerCarBody>,
-  ): Promise<CustomerCarSelect> {
+  ) {
     AuthServiceSingleton.requireAdmin(currentUser);
     const [customerCar] = await db
       .update(schema.customerCars)
@@ -113,16 +116,13 @@ class CustomerCarsService {
       .where(eq(schema.customerCars.id, id))
       .returning();
     if (!customerCar) throw NotFoundError;
-    return customerCar;
+    return this.findById(id);
   }
 
-  async delete(currentUser: CurrentUser, id: number): Promise<CustomerCarSelect> {
+  async delete(currentUser: CurrentUser, id: number) {
     AuthServiceSingleton.requireAdmin(currentUser);
-    const [customerCar] = await db
-      .delete(schema.customerCars)
-      .where(eq(schema.customerCars.id, id))
-      .returning();
-    if (!customerCar) throw NotFoundError;
+    const customerCar = await this.findById(id);
+    await db.delete(schema.customerCars).where(eq(schema.customerCars.id, id));
     return customerCar;
   }
 }

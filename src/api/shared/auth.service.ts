@@ -19,7 +19,11 @@ export const UnauthorizedError = new HttpError(401, "Вы не авторизо�
 export const ForbiddenError = new HttpError(403, "У вас недостаточно прав");
 
 const normalizeRole = (name: string): RoleName | null => {
-  if (name === "admin" || name === "administrator" || name === "администратор") {
+  if (
+    name === "admin" ||
+    name === "administrator" ||
+    name === "администратор"
+  ) {
     return ROLE.administrator;
   }
   if (name === "employee" || name === "worker" || name === "работник") {
