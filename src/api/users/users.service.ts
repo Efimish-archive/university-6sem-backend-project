@@ -1,4 +1,8 @@
-import type { HttpUserPostBody, HttpUsersQuery, UserSelect } from "./users.model";
+import type {
+  HttpUserPostBody,
+  HttpUsersQuery,
+  UserSelect,
+} from "./users.model";
 import { db, schema } from "@/db";
 import { and, asc, desc, eq, like, or } from "drizzle-orm";
 import { HttpError } from "@/error";
@@ -45,7 +49,8 @@ class UsersService {
           },
         },
       },
-      orderBy: query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
+      orderBy:
+        query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
       limit,
       offset,
     });
@@ -82,12 +87,19 @@ class UsersService {
     return this.findById(user.id);
   }
 
-  async update(currentUser: CurrentUser, id: number, data: Partial<HttpUserPostBody>) {
+  async update(
+    currentUser: CurrentUser,
+    id: number,
+    data: Partial<HttpUserPostBody>,
+  ) {
     AuthServiceSingleton.requireAdmin(currentUser);
     const { roleIds, ...userData } = data;
     await this.findById(id);
     if (Object.keys(userData).length > 0) {
-      await db.update(schema.users).set(userData).where(eq(schema.users.id, id));
+      await db
+        .update(schema.users)
+        .set(userData)
+        .where(eq(schema.users.id, id));
     }
     if (roleIds) {
       await db.delete(schema.roleUser).where(eq(schema.roleUser.userId, id));

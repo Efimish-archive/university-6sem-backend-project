@@ -11,14 +11,16 @@ const NotFoundError = new HttpError(404, "Машина не найдена");
 class CarsService {
   async findAll(query: HttpCarsQuery) {
     const { limit, offset } = toLimitOffset(query);
-    const orderColumn = query.sortBy === "model" ? schema.cars.model : schema.cars.id;
+    const orderColumn =
+      query.sortBy === "model" ? schema.cars.model : schema.cars.id;
     const items = await db.query.cars.findMany({
       where: and(
         query.model ? like(schema.cars.model, `%${query.model}%`) : undefined,
         query.brandId ? eq(schema.cars.brandId, query.brandId) : undefined,
       ),
       with: { brand: true },
-      orderBy: query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
+      orderBy:
+        query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
       limit,
       offset,
     });
@@ -35,7 +37,10 @@ class CarsService {
     return item;
   }
 
-  async create(currentUser: CurrentUser, data: HttpCarBody): Promise<CarSelect> {
+  async create(
+    currentUser: CurrentUser,
+    data: HttpCarBody,
+  ): Promise<CarSelect> {
     AuthServiceSingleton.requireAdmin(currentUser);
     const [car] = await db.insert(schema.cars).values(data).returning();
     return car;

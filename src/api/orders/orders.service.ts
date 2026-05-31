@@ -39,9 +39,12 @@ const fullName = (user: {
   firstName: string;
   lastName: string;
   patronymic: string | null;
-}) => [user.lastName, user.firstName, user.patronymic].filter(Boolean).join(" ");
+}) =>
+  [user.lastName, user.firstName, user.patronymic].filter(Boolean).join(" ");
 
-type OrderDetails = NonNullable<Awaited<ReturnType<OrdersService["findOrderDetails"]>>>;
+type OrderDetails = NonNullable<
+  Awaited<ReturnType<OrdersService["findOrderDetails"]>>
+>;
 
 const isAdmin = (currentUser: CurrentUser) =>
   currentUser.roles.includes(ROLE.administrator);
@@ -64,10 +67,13 @@ class OrdersService {
     const items = await db.query.orders.findMany({
       where: and(
         query.status ? eq(schema.orders.status, query.status) : undefined,
-        employeeFilter ? eq(schema.orders.employeeId, employeeFilter) : undefined,
+        employeeFilter
+          ? eq(schema.orders.employeeId, employeeFilter)
+          : undefined,
       ),
       with: this.orderWith,
-      orderBy: query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
+      orderBy:
+        query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
     });
 
     const visibleItems = items
@@ -94,7 +100,10 @@ class OrdersService {
     AuthServiceSingleton.requireAdmin(currentUser);
     const services = await this.getServices(data.serviceIds);
     const startDate = new Date();
-    const totalSeconds = services.reduce((sum, service) => sum + service.time, 0);
+    const totalSeconds = services.reduce(
+      (sum, service) => sum + service.time,
+      0,
+    );
     const endDate = new Date(startDate.getTime() + totalSeconds * 1000);
 
     const [order] = await db
@@ -139,7 +148,9 @@ class OrdersService {
     const order = await this.findOrderDetails(id);
     if (!order) throw NotFoundError;
 
-    await db.delete(schema.orderService).where(eq(schema.orderService.orderId, id));
+    await db
+      .delete(schema.orderService)
+      .where(eq(schema.orderService.orderId, id));
     const [deleted] = await db
       .delete(schema.orders)
       .where(eq(schema.orders.id, id))
@@ -302,7 +313,10 @@ class OrdersService {
 
   private toResponse(order: OrderDetails) {
     const services = order.orderService.map(({ service }) => service);
-    const totalSeconds = services.reduce((sum, service) => sum + service.time, 0);
+    const totalSeconds = services.reduce(
+      (sum, service) => sum + service.time,
+      0,
+    );
     const totalKopecks = services.reduce(
       (sum, service) => sum + service.price,
       0,

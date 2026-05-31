@@ -45,7 +45,8 @@ class ServicesService {
           ? lte(schema.services.price, rublesToKopecks(query.maxPriceRubles))
           : undefined,
       ),
-      orderBy: query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
+      orderBy:
+        query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
       limit,
       offset,
     });
@@ -70,7 +71,11 @@ class ServicesService {
     return toResponse(service);
   }
 
-  async update(currentUser: CurrentUser, id: number, data: Partial<HttpServiceBody>) {
+  async update(
+    currentUser: CurrentUser,
+    id: number,
+    data: Partial<HttpServiceBody>,
+  ) {
     AuthServiceSingleton.requireAdmin(currentUser);
     const values = {
       ...(data.name !== undefined ? { name: data.name } : {}),

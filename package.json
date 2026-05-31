@@ -6,6 +6,7 @@
     "start": "bun run src/index.ts",
     "dev": "bun run --watch src/index.ts",
     "test": "vitest",
+    "format": "prettier --write .",
     "drizzle": "drizzle-kit"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "drizzle-dbml-generator": "^0.10.0",
     "drizzle-kit": "^0.31.10",
     "drizzle-seed": "^0.3.1",
+    "prettier": "^3.8.3",
     "vite": "^8.0.14",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.7"
