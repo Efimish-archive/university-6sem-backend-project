@@ -1,6 +1,12 @@
+import { sendMail } from "@/mail";
+
 class NotificationsService {
   async sendOrderCompletedEmail(email: string, orderId: number) {
-    console.log(`Send order completed email to ${email} for order #${orderId}`);
+    await sendMail({
+      to: email,
+      subject: `Заказ #${orderId} завершен`,
+      text: `Здравствуйте! Ваш заказ #${orderId} в автомойке завершен.`,
+    });
   }
 }
 
