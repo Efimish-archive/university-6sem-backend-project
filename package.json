@@ -6,6 +6,7 @@
     "start": "bun run src/index.ts",
     "dev": "bun run --watch src/index.ts",
     "test": "vitest",
+    "coverage": "vitest run --coverage",
     "format": "prettier --write .",
     "drizzle": "drizzle-kit"
   },
@@ -21,6 +22,7 @@
     "@faker-js/faker": "^10.4.0",
     "@softwaretechnik/dbml-renderer": "^1.0.31",
     "@types/nodemailer": "^8.0.0",
+    "@vitest/coverage-v8": "4.1.7",
     "drizzle-dbml-generator": "^0.10.0",
     "drizzle-kit": "^0.31.10",
     "drizzle-seed": "^0.3.1",
