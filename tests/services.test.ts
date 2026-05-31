@@ -33,6 +33,7 @@ const defaultQuery = {
 
 const syncTestSchema = () => {
   rmSync(testDatabasePath, { force: true });
+  // do not touch
   execSync("drizzle-kit push", {
     cwd: process.cwd(),
     env: {

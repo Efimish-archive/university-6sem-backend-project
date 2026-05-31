@@ -72,8 +72,8 @@ const services = await db
     fakerRU.helpers.uniqueArray(
       () => ({
         name: fakerRU.word.words(5),
-        price: fakerRU.number.int({ min: 100, max: 1500 }),
-        time: fakerRU.number.int({ min: 10, max: 90 }),
+        price: fakerRU.number.int({ min: 10000, max: 150000 }),
+        time: fakerRU.number.int({ min: 600, max: 5400 }),
       }),
       150,
     ),
@@ -105,7 +105,7 @@ const orders = await db
         administratorId: fakerRU.helpers.arrayElement(adminUsers).id,
         customerCarId: fakerRU.helpers.arrayElement(customerCars).id,
         employeeId: fakerRU.helpers.arrayElement(employeeUsers).id,
-        status: 0,
+        status: 1,
         startDate: fakerRU.date.recent(),
         endDate: fakerRU.date.soon(),
       }),
