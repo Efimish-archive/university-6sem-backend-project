@@ -5,8 +5,8 @@ export const IdParamsSchema = z.object({
 });
 
 export const PaginationQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(20),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z.string().optional(),
   sortOrder: z.enum(["asc", "desc"]).default("asc"),
 });
@@ -14,6 +14,8 @@ export const PaginationQuerySchema = z.object({
 export const AuthHeadersSchema = z.object({
   "x-user-id": z.coerce.number().int().positive().optional(),
 });
+
+export const HttpDateSchema = z.iso.datetime();
 
 export type PaginationQuery = z.infer<typeof PaginationQuerySchema>;
 
@@ -42,3 +44,8 @@ export const listResponse = <T>(
     limit: query.limit,
   },
 });
+
+export const toHttpDate = (date: Date) => date.toISOString();
+
+export const toNullableHttpDate = (date: Date | null) =>
+  date ? toHttpDate(date) : null;

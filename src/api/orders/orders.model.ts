@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { schema } from "@/db";
+import { HttpDateSchema } from "@/api/shared/http.model";
 
 export type OrderSelect = typeof schema.orders.$inferSelect;
 
@@ -43,8 +44,8 @@ export const HttpOrdersQuerySchema = z.object({
 export const HttpOrderResponseSchema = z.object({
   id: z.number().int(),
   status: z.number().int(),
-  startDate: z.date(),
-  endDate: z.date(),
+  startDate: HttpDateSchema,
+  endDate: HttpDateSchema.nullable(),
   totalTime: z.number().int(),
   totalPrice: z.number(),
   administrator: z.object({

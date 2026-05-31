@@ -1,0 +1,8 @@
+services:
+  mailpit:
+    image: docker.io/axllent/mailpit
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025/tcp" # Порт для SMTP (прием писем)
+      - "127.0.0.1:8025:8025/tcp" # Порт для Web UI (просмотр писем)

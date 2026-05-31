@@ -87,9 +87,7 @@ const customerCars = await db
     fakerRU.helpers.uniqueArray(
       () => ({
         carId: fakerRU.helpers.arrayElement(cars).id,
-        customerId: fakerRU.helpers.arrayElement(
-          roleUser.filter(({ roleId }) => roleId === roles[2].id),
-        ).id,
+        customerId: fakerRU.helpers.arrayElement(users).id,
         year: fakerRU.number.int({ min: 1980, max: 2026 }),
         number: fakerRU.vehicle.vrm(),
       }),

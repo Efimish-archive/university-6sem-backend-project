@@ -1,7 +1,12 @@
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { HttpError } from "@/error";
-import { listResponse, toLimitOffset } from "@/api/shared/http.model";
+import {
+  listResponse,
+  toHttpDate,
+  toLimitOffset,
+  toNullableHttpDate,
+} from "@/api/shared/http.model";
 import {
   ForbiddenError,
   ROLE,
@@ -306,8 +311,8 @@ class OrdersService {
     return {
       id: order.id,
       status: order.status,
-      startDate: order.startDate,
-      endDate: order.endDate,
+      startDate: toHttpDate(order.startDate),
+      endDate: toNullableHttpDate(order.endDate),
       totalTime: secondsToMinutes(totalSeconds),
       totalPrice: kopecksToRubles(totalKopecks),
       administrator: {
