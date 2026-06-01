@@ -109,6 +109,10 @@ for (let i = 0; i < 50; i++) {
     (sum, service) => sum + service.time,
     0,
   );
+  const totalPrice = selectedServices.reduce(
+    (sum, service) => sum + service.price,
+    0,
+  );
   const status = fakerRU.helpers.arrayElement([1, 1, 1, 2]);
   const startedMinutesAgo = fakerRU.number.int({
     min: status === 2 ? 180 : 15,
@@ -126,6 +130,7 @@ for (let i = 0; i < 50; i++) {
       status,
       startDate,
       endDate,
+      totalPrice,
     })
     .returning();
 

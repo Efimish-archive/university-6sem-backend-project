@@ -143,7 +143,8 @@ export const orders = sqliteTable("orders", {
   startDate: int({ mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),
-  endDate: int({ mode: "timestamp" }),
+  endDate: int({ mode: "timestamp" }).notNull(),
+  totalPrice: int().notNull(),
 });
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({

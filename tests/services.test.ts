@@ -13,6 +13,7 @@ import { RolesServiceSingleton } from "@/api/roles/roles.service";
 import { ServicesServiceSingleton } from "@/api/services/services.service";
 import { UsersServiceSingleton } from "@/api/users/users.service";
 import { sendMail } from "@/mail";
+import { eq } from "drizzle-orm";
 
 vi.mock("@/mail", () => ({
   sendMail: vi.fn().mockResolvedValue({}),
@@ -33,7 +34,7 @@ const defaultQuery = {
 
 const syncTestSchema = () => {
   rmSync(testDatabasePath, { force: true });
-  // do not touch
+  // do not touch or i will jump out the window and die
   execSync("drizzle-kit push", {
     cwd: process.cwd(),
     env: {
@@ -341,6 +342,13 @@ describe("OrdersService", () => {
     expect(new Date(created.endDate!).getTime()).toBeGreaterThan(
       new Date(created.startDate).getTime(),
     );
+    await expect(
+      db.query.orders.findFirst({
+        where: eq(schema.orders.id, created.id),
+      }),
+    ).resolves.toMatchObject({
+      totalPrice: 70000,
+    });
 
     await expect(
       OrdersServiceSingleton.findById(employee, created.id),
@@ -370,6 +378,12 @@ describe("OrdersService", () => {
     await expect(
       OrdersServiceSingleton.addServices(admin, order.id, { serviceIds: [1] }),
     ).rejects.toMatchObject({ status: 409 });
+    await expect(
+      OrdersServiceSingleton.addServices(admin, order.id, { serviceIds: [2] }),
+    ).resolves.toMatchObject({
+      totalPrice: 700,
+      totalTime: 40,
+    });
 
     const completed = await OrdersServiceSingleton.updateStatus(
       admin,

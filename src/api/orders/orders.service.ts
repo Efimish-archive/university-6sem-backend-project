@@ -104,6 +104,10 @@ class OrdersService {
       (sum, service) => sum + service.time,
       0,
     );
+    const totalKopecks = services.reduce(
+      (sum, service) => sum + service.price,
+      0,
+    );
     const endDate = new Date(startDate.getTime() + totalSeconds * 1000);
 
     const [order] = await db
@@ -115,6 +119,7 @@ class OrdersService {
         status: ORDER_STATUS.inProgress,
         startDate,
         endDate,
+        totalPrice: totalKopecks,
       })
       .returning();
 
@@ -139,7 +144,7 @@ class OrdersService {
     this.requireEditable(order);
 
     await db.update(schema.orders).set(data).where(eq(schema.orders.id, id));
-    await this.recalculateEndDate(id);
+    await this.recalculateOrderCalculatedFields(id);
     return this.findById(currentUser, id);
   }
 
@@ -148,13 +153,18 @@ class OrdersService {
     const order = await this.findOrderDetails(id);
     if (!order) throw NotFoundError;
 
-    await db
-      .delete(schema.orderService)
-      .where(eq(schema.orderService.orderId, id));
-    const [deleted] = await db
-      .delete(schema.orders)
-      .where(eq(schema.orders.id, id))
-      .returning();
+    // ТРАНЗАКЦИЯ
+    const deleted = await db.transaction(async (tx) => {
+      await tx
+        .delete(schema.orderService)
+        .where(eq(schema.orderService.orderId, id));
+      const [deleted] = await tx
+        .delete(schema.orders)
+        .where(eq(schema.orders.id, id))
+        .returning();
+      return deleted;
+    });
+
     return this.toResponse({ ...order, ...deleted });
   }
 
@@ -230,7 +240,7 @@ class OrdersService {
       })),
     );
 
-    await this.recalculateEndDate(id);
+    await this.recalculateOrderCalculatedFields(id);
     return this.findById(currentUser, id);
   }
 
@@ -278,7 +288,7 @@ class OrdersService {
     return services;
   }
 
-  private async recalculateEndDate(orderId: number) {
+  private async recalculateOrderCalculatedFields(orderId: number) {
     const order = await this.findOrderDetails(orderId);
     if (!order) throw NotFoundError;
 
@@ -286,11 +296,15 @@ class OrdersService {
       (sum, { service }) => sum + service.time,
       0,
     );
+    const totalKopecks = order.orderService.reduce(
+      (sum, { service }) => sum + service.price,
+      0,
+    );
     const endDate = new Date(order.startDate.getTime() + totalSeconds * 1000);
 
     await db
       .update(schema.orders)
-      .set({ endDate })
+      .set({ endDate, totalPrice: totalKopecks })
       .where(eq(schema.orders.id, orderId));
   }
 
@@ -317,10 +331,6 @@ class OrdersService {
       (sum, service) => sum + service.time,
       0,
     );
-    const totalKopecks = services.reduce(
-      (sum, service) => sum + service.price,
-      0,
-    );
 
     return {
       id: order.id,
@@ -328,7 +338,7 @@ class OrdersService {
       startDate: toHttpDate(order.startDate),
       endDate: toNullableHttpDate(order.endDate),
       totalTime: secondsToMinutes(totalSeconds),
-      totalPrice: kopecksToRubles(totalKopecks),
+      totalPrice: kopecksToRubles(order.totalPrice),
       administrator: {
         id: order.administrator.id,
         fullName: fullName(order.administrator),
