@@ -15,19 +15,19 @@
     "@libsql/client": "^0.17.3",
     "drizzle-orm": "^0.45.2",
     "elysia": "1.4.28",
-    "nodemailer": "^8.0.10",
+    "nodemailer": "^8.0.11",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.4.0",
     "@softwaretechnik/dbml-renderer": "^1.0.31",
-    "@types/nodemailer": "^8.0.0",
+    "@types/nodemailer": "^8.0.1",
     "@vitest/coverage-v8": "4.1.7",
     "drizzle-dbml-generator": "^0.10.0",
     "drizzle-kit": "^0.31.10",
     "drizzle-seed": "^0.3.1",
-    "prettier": "^3.8.3",
-    "vite": "^8.0.14",
-    "vitest": "^4.1.7"
+    "prettier": "^3.8.4",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   }
 }
