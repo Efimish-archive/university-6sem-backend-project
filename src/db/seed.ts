@@ -4,7 +4,7 @@ import argon2 from "argon2";
 import { db, schema } from "@/db";
 import { execSync } from "child_process";
 
-console.log(execSync("drizzle-kit push", { encoding: "utf-8" }));
+console.log(execSync("bunx drizzle-kit push", { encoding: "utf-8" }));
 await reset(db as any, schema);
 console.log("[✓] Reset database");
 
