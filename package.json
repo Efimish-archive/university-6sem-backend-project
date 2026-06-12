@@ -11,8 +11,12 @@
     "drizzle": "drizzle-kit"
   },
   "dependencies": {
+    "@elysiajs/bearer": "^1.4.4",
+    "@elysiajs/cors": "^1.4.2",
+    "@elysiajs/jwt": "^1.4.2",
     "@elysiajs/openapi": "^1.4.15",
     "@libsql/client": "^0.17.3",
+    "argon2": "^0.44.0",
     "drizzle-orm": "^0.45.2",
     "elysia": "1.4.28",
     "nodemailer": "^8.0.11",

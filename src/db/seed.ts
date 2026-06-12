@@ -1,5 +1,6 @@
 import { reset } from "drizzle-seed";
 import { fakerRU } from "@faker-js/faker";
+import argon2 from "argon2";
 import { db, schema } from "@/db";
 import { execSync } from "child_process";
 
@@ -13,6 +14,7 @@ const roles = await db
   .returning();
 console.log("[✓] Созданы фейковые роли");
 
+const passwordHash = await argon2.hash("1");
 const users = await db
   .insert(schema.users)
   .values(
@@ -25,6 +27,7 @@ const users = await db
         lastName,
         email: fakerRU.internet.email({ firstName, lastName }),
         isSendNotify: fakerRU.datatype.boolean({ probability: 0.7 }),
+        passwordHash,
       };
     }, 30),
   )

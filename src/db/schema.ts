@@ -8,6 +8,8 @@ export const users = sqliteTable("users", {
   patronymic: text(),
   email: text().notNull().unique(),
   isSendNotify: int({ mode: "boolean" }).notNull(),
+  // не было в задании
+  passwordHash: text().notNull(),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -144,6 +146,7 @@ export const orders = sqliteTable("orders", {
     .$defaultFn(() => new Date())
     .notNull(),
   endDate: int({ mode: "timestamp" }).notNull(),
+  // не было в задании
   totalPrice: int().notNull(),
 });
 

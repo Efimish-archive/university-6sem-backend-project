@@ -1,8 +1,8 @@
-import { Elysia } from "elysia";
-// import { bearer } from "@elysiajs/bearer";
-// import { jwt } from "@elysiajs/jwt";
+import { Elysia, StatusMap } from "elysia";
+import { bearer } from "@elysiajs/bearer";
+import { jwt } from "@elysiajs/jwt";
 import { z } from "zod";
-// import { env } from "./env";
+import { env } from "./env";
 // import { HttpError } from "@/error";
 // import { UserRoleSchema } from "@/modules/auth/auth.model";
 
@@ -12,21 +12,21 @@ import { z } from "zod";
 // });
 
 export const context = new Elysia({ name: "context" })
-  // .use(bearer())
-  // .use(
-  //   jwt({
-  //     name: "jwt",
-  //     secret: env.JWT_SECRET,
-  //     exp: "7d",
-  //   })
-  // )
+  .use(bearer())
+  .use(
+    jwt({
+      name: "jwt",
+      secret: env.JWT_SECRET,
+      exp: "7d",
+      schema: z.object({
+        sub: z.string(),
+      }),
+    }),
+  )
   .model({
     error: z.object({
       error: z.string(),
-      code: z.number().optional(),
-    }),
-    message: z.object({
-      message: z.string(),
+      code: z.enum(StatusMap),
     }),
   });
 // .macro("auth", {
