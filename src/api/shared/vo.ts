@@ -1,6 +1,6 @@
 export type MoneyVo = {
-  minValue: number;
-  maxValue: number;
+  kopecks: number;
+  rubles: number;
   format: string;
 };
 
@@ -19,8 +19,8 @@ export const moneyVo = (kopecks: number): MoneyVo => {
   const rubles = kopecksToRubles(kopecks);
 
   return {
-    minValue: kopecks,
-    maxValue: rubles,
+    kopecks: kopecks,
+    rubles: rubles,
     format: `${rubles} руб.`,
   };
 };

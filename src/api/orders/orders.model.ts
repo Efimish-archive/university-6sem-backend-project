@@ -70,8 +70,8 @@ export const HttpOrderResponseSchema = z.object({
       id: z.number().int(),
       name: z.string(),
       price: z.object({
-        minValue: z.number(),
-        maxValue: z.number(),
+        rubles: z.number(),
+        kopecks: z.number(),
         format: z.string(),
       }),
       time: z.object({
