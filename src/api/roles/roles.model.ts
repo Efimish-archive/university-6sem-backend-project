@@ -10,7 +10,7 @@ export const HttpRoleBodySchema = z.object({
 });
 
 export const HttpRoleResponseSchema = HttpRoleBodySchema.extend({
-  id: z.number().int(),
+  id: z.number().int().min(0),
 });
 
 export const HttpRolesListResponseSchema = listResponseSchema(
@@ -18,8 +18,8 @@ export const HttpRolesListResponseSchema = listResponseSchema(
 );
 
 export const HttpRolesQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(20),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z.enum(["id", "name"]).default("id"),
   sortOrder: z.enum(["asc", "desc"]).default("asc"),
   name: z.string().optional(),

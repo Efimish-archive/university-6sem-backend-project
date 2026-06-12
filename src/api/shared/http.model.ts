@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const IdParamsSchema = z.object({
-  id: z.coerce.number().int().positive(),
+  id: z.coerce.number().int().min(0),
 });
 
 export const PaginationQuerySchema = z.object({
@@ -18,11 +18,12 @@ export type PaginationQuery = z.infer<typeof PaginationQuerySchema>;
 export type ListMeta = {
   page: number;
   limit: number;
+  total: number;
 };
 
 export type ListResponse<T> = {
-  items: T[];
-  meta: ListMeta;
+  data: T[];
+  pagination: ListMeta;
 };
 
 export const toLimitOffset = (query: PaginationQuery) => ({
@@ -31,22 +32,25 @@ export const toLimitOffset = (query: PaginationQuery) => ({
 });
 
 export const listResponse = <T>(
-  items: T[],
+  data: T[],
   query: PaginationQuery,
+  total: number,
 ): ListResponse<T> => ({
-  items,
-  meta: {
+  data,
+  pagination: {
     page: query.page,
     limit: query.limit,
+    total,
   },
 });
 
 export const listResponseSchema = (itemSchema: z.ZodType) =>
   z.object({
-    items: z.array(itemSchema),
-    meta: z.object({
-      page: z.number().int(),
-      limit: z.number().int(),
+    data: z.array(itemSchema),
+    pagination: z.object({
+      page: z.int().min(1),
+      limit: z.int().min(1),
+      total: z.int().min(0),
     }),
   });
 

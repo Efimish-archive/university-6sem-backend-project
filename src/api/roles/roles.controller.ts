@@ -1,7 +1,6 @@
 import { Elysia } from "elysia";
 import { context } from "@/context";
-import { AuthServiceSingleton } from "@/api/shared/auth.service";
-import { AuthHeadersSchema, IdParamsSchema } from "@/api/shared/http.model";
+import { IdParamsSchema } from "@/api/shared/http.model";
 import {
   HttpRoleBodySchema,
   HttpRolesListResponseSchema,
@@ -29,60 +28,35 @@ export const rolesController = new Elysia({ prefix: "roles" })
       },
     },
   )
-  .post(
-    "",
-    async ({ body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return RolesServiceSingleton.create(currentUser, body);
+  .post("", async ({ body }) => RolesServiceSingleton.create(body), {
+    body: HttpRoleBodySchema,
+    response: {
+      200: HttpRoleResponseSchema,
     },
-    {
-      headers: AuthHeadersSchema,
-      body: HttpRoleBodySchema,
-      response: {
-        200: HttpRoleResponseSchema,
-        401: "error",
-        403: "error",
-      },
-    },
-  )
+    auth: "админ",
+  })
   .put(
     "/:id",
-    async ({ params: { id }, body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return RolesServiceSingleton.update(currentUser, id, body);
-    },
+    async ({ params: { id }, body }) => RolesServiceSingleton.update(id, body),
     {
-      headers: AuthHeadersSchema,
       params: IdParamsSchema,
       body: HttpRoleBodySchema.partial(),
       response: {
         200: HttpRoleResponseSchema,
-        401: "error",
-        403: "error",
         404: "error",
       },
+      auth: "админ",
     },
   )
   .delete(
     "/:id",
-    async ({ params: { id }, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return RolesServiceSingleton.delete(currentUser, id);
-    },
+    async ({ params: { id } }) => RolesServiceSingleton.delete(id),
     {
-      headers: AuthHeadersSchema,
       params: IdParamsSchema,
       response: {
         200: HttpRoleResponseSchema,
-        401: "error",
-        403: "error",
         404: "error",
       },
+      auth: "админ",
     },
   );

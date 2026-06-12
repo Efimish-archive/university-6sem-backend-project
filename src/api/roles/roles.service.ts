@@ -1,58 +1,56 @@
-import { and, asc, desc, eq, like } from "drizzle-orm";
+import type { HttpRoleBody, HttpRolesQuery, RoleSelect } from "./roles.model";
+import type { ListResponse } from "@/api/shared/http.model";
+import { count, and, asc, desc, eq, like } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { HttpError } from "@/error";
-import { listResponse, toLimitOffset } from "@/api/shared/http.model";
-import type { CurrentUser } from "@/api/shared/auth.service";
-import { AuthServiceSingleton } from "@/api/shared/auth.service";
-import type { HttpRoleBody, HttpRolesQuery, RoleSelect } from "./roles.model";
 
 const NotFoundError = new HttpError(404, "Роль не найдена");
 
 class RolesService {
-  async findAll(query: HttpRolesQuery) {
-    const { limit, offset } = toLimitOffset(query);
+  async findAll(query: HttpRolesQuery): Promise<ListResponse<RoleSelect>> {
     const orderColumn =
       query.sortBy === "name" ? schema.roles.name : schema.roles.id;
-    const items = await db
-      .select()
-      .from(schema.roles)
-      .where(
-        and(
-          query.name ? like(schema.roles.name, `%${query.name}%`) : undefined,
-        ),
-      )
-      .orderBy(
-        query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
-      )
-      .limit(limit)
-      .offset(offset);
+    const where = and(
+      query.name ? like(schema.roles.name, `%${query.name}%`) : undefined,
+    );
 
-    return listResponse(items, query);
+    const roles = await db.query.roles.findMany({
+      where,
+      orderBy:
+        query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
+      offset: (query.page - 1) * query.limit,
+      limit: query.limit,
+    });
+
+    const [{ count: total }] = await db
+      .select({ count: count() })
+      .from(schema.roles)
+      .where(where);
+
+    return {
+      data: roles,
+      pagination: {
+        page: query.page,
+        limit: query.limit,
+        total,
+      },
+    };
   }
 
   async findById(id: number): Promise<RoleSelect> {
-    const item = await db.query.roles.findFirst({
+    const role = await db.query.roles.findFirst({
       where: eq(schema.roles.id, id),
     });
-    if (!item) throw NotFoundError;
-    return item;
+    if (!role) throw NotFoundError;
+    return role;
   }
 
-  async create(
-    currentUser: CurrentUser,
-    data: HttpRoleBody,
-  ): Promise<RoleSelect> {
-    AuthServiceSingleton.requireAdmin(currentUser);
+  async create(data: HttpRoleBody): Promise<RoleSelect> {
     const [role] = await db.insert(schema.roles).values(data).returning();
     return role;
   }
 
-  async update(
-    currentUser: CurrentUser,
-    id: number,
-    data: Partial<HttpRoleBody>,
-  ): Promise<RoleSelect> {
-    AuthServiceSingleton.requireAdmin(currentUser);
+  async update(id: number, data: Partial<HttpRoleBody>): Promise<RoleSelect> {
     const [role] = await db
       .update(schema.roles)
       .set(data)
@@ -62,8 +60,7 @@ class RolesService {
     return role;
   }
 
-  async delete(currentUser: CurrentUser, id: number): Promise<RoleSelect> {
-    AuthServiceSingleton.requireAdmin(currentUser);
+  async delete(id: number): Promise<RoleSelect> {
     const [role] = await db
       .delete(schema.roles)
       .where(eq(schema.roles.id, id))

@@ -27,7 +27,6 @@ class AuthService {
       },
     });
     if (!user) throw WrongCredentialsError;
-    console.log(JSON.stringify(user, null, 2));
 
     const isPasswordCorrect = await argon2.verify(user.passwordHash, password);
     if (!isPasswordCorrect) throw WrongCredentialsError;

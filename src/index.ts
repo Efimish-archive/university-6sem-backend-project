@@ -4,7 +4,7 @@ import { openapi } from "@elysiajs/openapi";
 import { env } from "@/env";
 
 import { authController } from "@/api/auth/auth.controller";
-// import { rolesController } from "@/api/roles/roles.controller";
+import { rolesController } from "@/api/roles/roles.controller";
 // import { usersController } from "@/api/users/users.controller";
 // import { brandsController } from "@/api/brands/brands.controller";
 // import { carsController } from "@/api/cars/cars.controller";
@@ -35,7 +35,7 @@ new Elysia()
     }),
   )
   .use(authController)
-  // .use(rolesController)
+  .use(rolesController)
   // .use(usersController)
   // .use(brandsController)
   // .use(carsController)
