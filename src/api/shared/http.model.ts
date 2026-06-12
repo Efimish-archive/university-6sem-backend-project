@@ -11,10 +11,6 @@ export const PaginationQuerySchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).default("asc"),
 });
 
-export const AuthHeadersSchema = z.object({
-  "x-user-id": z.coerce.number().int().positive().optional(),
-});
-
 export const HttpDateSchema = z.iso.datetime();
 
 export type PaginationQuery = z.infer<typeof PaginationQuerySchema>;

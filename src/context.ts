@@ -3,13 +3,11 @@ import { bearer } from "@elysiajs/bearer";
 import { jwt } from "@elysiajs/jwt";
 import { z } from "zod";
 import { env } from "./env";
-// import { HttpError } from "@/error";
-// import { UserRoleSchema } from "@/modules/auth/auth.model";
+import { HttpError } from "@/error";
+import { UserRoleSchema, type UserRole } from "@/api/auth/auth.model";
 
-// const AuthSchema = z.object({
-//   sub: z.string(),
-//   role: UserRoleSchema,
-// });
+const UnauthorizedError = new HttpError(401, "Вы не авторизованы");
+const ForbiddenError = new HttpError(403, "У вас недостаточно прав");
 
 export const context = new Elysia({ name: "context" })
   .use(bearer())
@@ -20,6 +18,7 @@ export const context = new Elysia({ name: "context" })
       exp: "7d",
       schema: z.object({
         sub: z.string(),
+        role: UserRoleSchema,
       }),
     }),
   )
@@ -28,38 +27,24 @@ export const context = new Elysia({ name: "context" })
       error: z.string(),
       code: z.enum(StatusMap),
     }),
+  })
+  .macro({
+    auth: (role: UserRole) => ({
+      detail: {
+        security: [{ bearerAuth: [] }],
+      },
+      response: {
+        401: "error",
+        403: "error",
+      },
+      resolve: async ({ bearer, jwt }) => {
+        if (!bearer) throw UnauthorizedError;
+
+        const auth = await jwt.verify(bearer);
+        if (!auth) throw UnauthorizedError;
+        if (auth.role !== role) throw ForbiddenError;
+
+        return { auth };
+      },
+    }),
   });
-// .macro("auth", {
-//   detail: {
-//     security: [{ bearerAuth: [] }]
-//   },
-//   headers: z.object({
-//     authorization: z.string().startsWith("Bearer "),
-//   }),
-//   response: {
-//     401: "error",
-//   },
-//   resolve: async ({ bearer, jwt, status }) => {
-//     const error = status(401, { error: "Вы не авторизованы" });
-//     if (!bearer) return error;
-
-//     const auth = await jwt.verify(bearer);
-//     if (!auth) return error;
-
-//     const { data } = AuthSchema.safeParse(auth);
-//     if (!data) return error;
-
-//     return { auth: data };
-//   },
-// })
-// .macro("authAdmin", {
-//   auth: true,
-//   response: {
-//     403: "error",
-//   },
-//   resolve: ({ auth, status }) => {
-//     if (auth.role !== "admin") return status(403, {
-//       error: "У вас недостаточно прав",
-//     });
-//   },
-// })
