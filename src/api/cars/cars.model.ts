@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { schema } from "@/db";
 import { listResponseSchema } from "@/api/shared/http.model";
 
 export const CarInsertSchema = z.object({
@@ -9,8 +8,10 @@ export const CarInsertSchema = z.object({
 
 export const CarSelectSchema = z.object({
   id: z.int().min(1),
-  brandId: z.int().min(1),
-  brand: z.string().min(1),
+  brand: z.object({
+    id: z.int().min(1),
+    name: z.string().min(1),
+  }),
   model: z.string().min(1),
 });
 

@@ -20,8 +20,10 @@ type CarSelectInternal = Awaited<
 
 const toResponse = (car: CarSelectInternal): CarSelect => ({
   id: car.id,
-  brandId: car.brandId,
-  brand: car.brand.name,
+  brand: {
+    id: car.brand.id,
+    name: car.brand.name,
+  },
   model: car.model,
 });
 
@@ -86,9 +88,7 @@ class CarsService {
 
   async delete(id: number): Promise<CarSelect> {
     const car = this.findById(id);
-
     await db.delete(schema.cars).where(eq(schema.cars.id, id)).returning();
-
     return car;
   }
 }
