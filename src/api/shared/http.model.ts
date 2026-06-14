@@ -44,9 +44,9 @@ export const listResponse = <T>(
   },
 });
 
-export const listResponseSchema = (itemSchema: z.ZodType) =>
+export const listResponseSchema = <T extends z.ZodType>(itemSchema: T) =>
   z.object({
-    data: z.array(itemSchema),
+    data: itemSchema.array(),
     pagination: z.object({
       page: z.int().min(1),
       limit: z.int().min(1),

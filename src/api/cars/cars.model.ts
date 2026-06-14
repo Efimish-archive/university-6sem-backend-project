@@ -2,37 +2,30 @@ import { z } from "zod";
 import { schema } from "@/db";
 import { listResponseSchema } from "@/api/shared/http.model";
 
-export type CarSelect = typeof schema.cars.$inferSelect;
-
-export const HttpCarBodySchema = z.object({
-  brandId: z.number().int().positive(),
+export const CarInsertSchema = z.object({
+  brandId: z.int().min(1),
   model: z.string().min(1),
 });
 
-export const HttpCarResponseSchema = z.object({
-  id: z.number().int(),
-  brandId: z.number().int(),
-  model: z.string(),
-  brand: z
-    .object({
-      id: z.number().int(),
-      name: z.string(),
-    })
-    .optional(),
+export const CarSelectSchema = z.object({
+  id: z.int().min(1),
+  brandId: z.int().min(1),
+  brand: z.string().min(1),
+  model: z.string().min(1),
 });
 
-export const HttpCarsListResponseSchema = listResponseSchema(
-  HttpCarResponseSchema,
-);
+export const CarsListSelectSchema = listResponseSchema(CarSelectSchema);
 
-export const HttpCarsQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(20),
+export const CarsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z.enum(["id", "model"]).default("id"),
   sortOrder: z.enum(["asc", "desc"]).default("asc"),
-  model: z.string().optional(),
-  brandId: z.coerce.number().int().positive().optional(),
+  model: z.string().min(1).optional(),
+  brandId: z.coerce.number().int().min(1).optional(),
 });
 
-export type HttpCarBody = z.infer<typeof HttpCarBodySchema>;
-export type HttpCarsQuery = z.infer<typeof HttpCarsQuerySchema>;
+export type CarInsert = z.infer<typeof CarInsertSchema>;
+export type CarSelect = z.infer<typeof CarSelectSchema>;
+export type CarsListSelect = z.infer<typeof CarsListSelectSchema>;
+export type CarsQuery = z.infer<typeof CarsQuerySchema>;
