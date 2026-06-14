@@ -1,12 +1,9 @@
 import { Elysia } from "elysia";
 import { context } from "@/context";
+import { CredentialsSchema, TokenSchema } from "./auth.model";
 import { AuthServiceSingleton } from "./auth.service";
-import {
-  HttpCredentialsBodySchema,
-  HttpTokenResponseSchema,
-} from "./auth.model";
 
-export const authController = new Elysia({ prefix: "/auth" }) //
+export const authController = new Elysia({ prefix: "auth" }) //
   .use(context)
   .post(
     "/login",
@@ -19,9 +16,9 @@ export const authController = new Elysia({ prefix: "/auth" }) //
       return token;
     },
     {
-      body: HttpCredentialsBodySchema,
+      body: CredentialsSchema,
       response: {
-        200: HttpTokenResponseSchema,
+        200: TokenSchema,
         400: "error",
       },
     },

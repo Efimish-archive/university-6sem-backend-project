@@ -29,7 +29,7 @@ export const context = new Elysia({ name: "context" })
     }),
   })
   .macro({
-    auth: (role: UserRole) => ({
+    auth: (roles: UserRole | UserRole[]) => ({
       detail: {
         security: [{ bearerAuth: [] }],
       },
@@ -42,7 +42,9 @@ export const context = new Elysia({ name: "context" })
 
         const auth = await jwt.verify(bearer);
         if (!auth) throw UnauthorizedError;
-        if (auth.role !== role) throw ForbiddenError;
+
+        if (!Array.isArray(roles)) roles = [roles];
+        if (!roles.includes(auth.role)) throw ForbiddenError;
 
         return { auth };
       },
