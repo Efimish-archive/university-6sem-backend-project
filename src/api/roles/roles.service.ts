@@ -8,16 +8,16 @@ const NotFoundError = new HttpError(404, "Роль не найдена");
 
 class RolesService {
   async findAll(query: HttpRolesQuery): Promise<ListResponse<RoleSelect>> {
-    const orderColumn =
-      query.sortBy === "name" ? schema.roles.name : schema.roles.id;
+    const orderColumn = schema.roles[query.sortBy];
+    const orderBy =
+      query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);
     const where = and(
       query.name ? like(schema.roles.name, `%${query.name}%`) : undefined,
     );
 
     const roles = await db.query.roles.findMany({
       where,
-      orderBy:
-        query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
+      orderBy,
       offset: (query.page - 1) * query.limit,
       limit: query.limit,
     });

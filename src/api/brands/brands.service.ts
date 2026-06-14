@@ -1,7 +1,11 @@
-import { and, asc, desc, eq, like } from "drizzle-orm";
+import { count, and, asc, desc, eq, like } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { HttpError } from "@/error";
-import { listResponse, toLimitOffset } from "@/api/shared/http.model";
+import {
+  ListResponse,
+  listResponse,
+  toLimitOffset,
+} from "@/api/shared/http.model";
 import type { CurrentUser } from "@/api/shared/auth.service";
 import { AuthServiceSingleton } from "@/api/shared/auth.service";
 import type {
@@ -13,25 +17,34 @@ import type {
 const NotFoundError = new HttpError(404, "Бренд не найден");
 
 class BrandsService {
-  async findAll(query: HttpBrandsQuery) {
-    const { limit, offset } = toLimitOffset(query);
-    const orderColumn =
-      query.sortBy === "name" ? schema.brands.name : schema.brands.id;
-    const items = await db
-      .select()
-      .from(schema.brands)
-      .where(
-        and(
-          query.name ? like(schema.brands.name, `%${query.name}%`) : undefined,
-        ),
-      )
-      .orderBy(
-        query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn),
-      )
-      .limit(limit)
-      .offset(offset);
+  async findAll(query: HttpBrandsQuery): Promise<ListResponse<BrandSelect>> {
+    const orderColumn = schema.brands[query.sortBy];
+    const orderBy =
+      query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);
+    const where = and(
+      query.name ? like(schema.brands.name, `%${query.name}%`) : undefined,
+    );
 
-    return listResponse(items, query);
+    const brands = await db.query.brands.findMany({
+      where,
+      orderBy,
+      offset: (query.page - 1) * query.limit,
+      limit: query.limit,
+    });
+
+    const [{ count: total }] = await db
+      .select({ count: count() })
+      .from(schema.brands)
+      .where(where);
+
+    return {
+      data: brands,
+      pagination: {
+        page: query.page,
+        limit: query.limit,
+        total,
+      },
+    };
   }
 
   async findById(id: number): Promise<BrandSelect> {

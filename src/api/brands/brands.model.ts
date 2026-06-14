@@ -9,7 +9,7 @@ export const HttpBrandBodySchema = z.object({
 });
 
 export const HttpBrandResponseSchema = HttpBrandBodySchema.extend({
-  id: z.number().int(),
+  id: z.int().min(1),
 });
 
 export const HttpBrandsListResponseSchema = listResponseSchema(
@@ -17,8 +17,8 @@ export const HttpBrandsListResponseSchema = listResponseSchema(
 );
 
 export const HttpBrandsQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(20),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z.enum(["id", "name"]).default("id"),
   sortOrder: z.enum(["asc", "desc"]).default("asc"),
   name: z.string().optional(),

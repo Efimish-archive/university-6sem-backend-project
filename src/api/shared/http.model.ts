@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const IdParamsSchema = z.object({
-  id: z.coerce.number().int().min(0),
+  id: z.coerce.number().int().min(1),
 });
 
 export const PaginationQuerySchema = z.object({

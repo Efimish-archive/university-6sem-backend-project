@@ -10,7 +10,7 @@ export const HttpRoleBodySchema = z.object({
 });
 
 export const HttpRoleResponseSchema = HttpRoleBodySchema.extend({
-  id: z.number().int().min(0),
+  id: z.int().min(1),
 });
 
 export const HttpRolesListResponseSchema = listResponseSchema(
