@@ -1,21 +1,20 @@
 import { Elysia } from "elysia";
 import { context } from "@/context";
-import { AuthServiceSingleton } from "@/api/shared/auth.service";
-import { AuthHeadersSchema, IdParamsSchema } from "@/api/shared/http.model";
+import { IdParamsSchema } from "@/api/shared/http.model";
 import {
-  HttpCustomerCarBodySchema,
-  HttpCustomerCarsListResponseSchema,
-  HttpCustomerCarResponseSchema,
-  HttpCustomerCarsQuerySchema,
+  CustomerCarInsertSchema,
+  CustomerCarSelectSchema,
+  CustomerCarsListSelectSchema,
+  CustomerCarsQuerySchema,
 } from "./customer-cars.model";
 import { CustomerCarsServiceSingleton } from "./customer-cars.service";
 
 export const customerCarsController = new Elysia({ prefix: "customer-cars" })
   .use(context)
   .get("", async ({ query }) => CustomerCarsServiceSingleton.findAll(query), {
-    query: HttpCustomerCarsQuerySchema,
+    query: CustomerCarsQuerySchema,
     response: {
-      200: HttpCustomerCarsListResponseSchema,
+      200: CustomerCarsListSelectSchema,
     },
   })
   .get(
@@ -24,65 +23,41 @@ export const customerCarsController = new Elysia({ prefix: "customer-cars" })
     {
       params: IdParamsSchema,
       response: {
-        200: HttpCustomerCarResponseSchema,
+        200: CustomerCarSelectSchema,
         404: "error",
       },
     },
   )
-  .post(
-    "",
-    async ({ body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return CustomerCarsServiceSingleton.create(currentUser, body);
+  .post("", async ({ body }) => CustomerCarsServiceSingleton.create(body), {
+    body: CustomerCarInsertSchema,
+    response: {
+      200: CustomerCarSelectSchema,
     },
-    {
-      headers: AuthHeadersSchema,
-      body: HttpCustomerCarBodySchema,
-      response: {
-        200: HttpCustomerCarResponseSchema,
-        401: "error",
-        403: "error",
-      },
-    },
-  )
+    auth: "админ",
+  })
   .put(
     "/:id",
-    async ({ params: { id }, body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return CustomerCarsServiceSingleton.update(currentUser, id, body);
-    },
+    async ({ params: { id }, body }) =>
+      CustomerCarsServiceSingleton.update(id, body),
     {
-      headers: AuthHeadersSchema,
       params: IdParamsSchema,
-      body: HttpCustomerCarBodySchema.partial(),
+      body: CustomerCarInsertSchema.partial(),
       response: {
-        200: HttpCustomerCarResponseSchema,
-        401: "error",
-        403: "error",
+        200: CustomerCarSelectSchema,
         404: "error",
       },
+      auth: "админ",
     },
   )
   .delete(
     "/:id",
-    async ({ params: { id }, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return CustomerCarsServiceSingleton.delete(currentUser, id);
-    },
+    async ({ params: { id } }) => CustomerCarsServiceSingleton.delete(id),
     {
-      headers: AuthHeadersSchema,
       params: IdParamsSchema,
       response: {
-        200: HttpCustomerCarResponseSchema,
-        401: "error",
-        403: "error",
+        200: CustomerCarSelectSchema,
         404: "error",
       },
+      auth: "админ",
     },
   );

@@ -9,7 +9,7 @@ import { usersController } from "@/api/users/users.controller";
 import { brandsController } from "@/api/brands/brands.controller";
 import { carsController } from "@/api/cars/cars.controller";
 // import { servicesController } from "@/api/services/services.controller";
-// import { customerCarsController } from "@/api/customer-cars/customer-cars.controller";
+import { customerCarsController } from "@/api/customer-cars/customer-cars.controller";
 // import { ordersController } from "@/api/orders/orders.controller";
 
 new Elysia()
@@ -40,7 +40,7 @@ new Elysia()
   .use(brandsController)
   .use(carsController)
   // .use(servicesController)
-  // .use(customerCarsController)
+  .use(customerCarsController)
   // .use(ordersController)
   .listen(env.PORT);
 

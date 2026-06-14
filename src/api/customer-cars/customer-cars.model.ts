@@ -1,52 +1,56 @@
 import { z } from "zod";
-import { schema } from "@/db";
 import { listResponseSchema } from "@/api/shared/http.model";
 
-export type CustomerCarSelect = typeof schema.customerCars.$inferSelect;
-
-export const HttpCustomerCarBodySchema = z.object({
-  carId: z.number().int().positive(),
-  customerId: z.number().int().positive(),
-  year: z.number().int().min(1900).max(2100),
+export const CustomerCarInsertSchema = z.object({
+  carId: z.int().min(1),
+  customerId: z.int().min(1),
+  year: z.int().min(1900).max(new Date().getFullYear()),
   number: z.string().min(1),
 });
 
-export const HttpCustomerCarResponseSchema = z.object({
-  id: z.number().int(),
-  year: z.number().int().nullable(),
-  number: z.string().nullable(),
-  customer: z
-    .object({
-      id: z.number().int(),
-      fullName: z.string(),
-      email: z.string(),
-    })
-    .nullable(),
-  car: z
-    .object({
-      id: z.number().int(),
-      model: z.string(),
-      brand: z.object({
-        id: z.number().int(),
+export const CustomerCarSelectSchema = z.object({
+  id: z.int().min(1),
+  car: z.object({
+    id: z.int().min(1),
+    brand: z.object({
+      id: z.int().min(1),
+      name: z.string().min(1),
+    }),
+    model: z.string().min(1),
+  }),
+  customer: z.object({
+    id: z.int().min(1),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+    patronymic: z.string().min(1).nullable(),
+    email: z.string(),
+    isSendNotify: z.boolean(),
+    roles: z
+      .object({
+        id: z.int().min(1),
         name: z.string(),
-      }),
-    })
-    .nullable(),
+      })
+      .array(),
+  }),
+  year: z.int().min(1900).max(new Date().getFullYear()),
+  number: z.string().min(1),
 });
 
-export const HttpCustomerCarsListResponseSchema = listResponseSchema(
-  HttpCustomerCarResponseSchema,
+export const CustomerCarsListSelectSchema = listResponseSchema(
+  CustomerCarSelectSchema,
 );
 
-export const HttpCustomerCarsQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(20),
+export const CustomerCarsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z.enum(["id", "year", "number"]).default("id"),
   sortOrder: z.enum(["asc", "desc"]).default("asc"),
-  customerId: z.coerce.number().int().positive().optional(),
-  carId: z.coerce.number().int().positive().optional(),
-  number: z.string().optional(),
+  customerId: z.coerce.number().int().min(1).optional(),
+  carId: z.coerce.number().int().min(1).optional(),
+  number: z.string().min(1).optional(),
 });
 
-export type HttpCustomerCarBody = z.infer<typeof HttpCustomerCarBodySchema>;
-export type HttpCustomerCarsQuery = z.infer<typeof HttpCustomerCarsQuerySchema>;
+export type CustomerCarInsert = z.infer<typeof CustomerCarInsertSchema>;
+export type CustomerCarSelect = z.infer<typeof CustomerCarSelectSchema>;
+export type CustomerCarsListSelect = z.infer<typeof CustomerCarsListSelectSchema>;
+export type CustomerCarsQuery = z.infer<typeof CustomerCarsQuerySchema>;
