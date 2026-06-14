@@ -1,5 +1,9 @@
-import type { HttpRoleBody, HttpRolesQuery, RoleSelect } from "./roles.model";
-import type { ListResponse } from "@/api/shared/http.model";
+import type {
+  RoleInsert,
+  RoleSelect,
+  RolesListSelect,
+  RolesQuery,
+} from "./roles.model";
 import { count, and, asc, desc, eq, like } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { HttpError } from "@/error";
@@ -7,7 +11,7 @@ import { HttpError } from "@/error";
 const NotFoundError = new HttpError(404, "Роль не найдена");
 
 class RolesService {
-  async findAll(query: HttpRolesQuery): Promise<ListResponse<RoleSelect>> {
+  async findAll(query: RolesQuery): Promise<RolesListSelect> {
     const orderColumn = schema.roles[query.sortBy];
     const orderBy =
       query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);
@@ -45,12 +49,12 @@ class RolesService {
     return role;
   }
 
-  async create(data: HttpRoleBody): Promise<RoleSelect> {
+  async create(data: RoleInsert): Promise<RoleSelect> {
     const [role] = await db.insert(schema.roles).values(data).returning();
     return role;
   }
 
-  async update(id: number, data: Partial<HttpRoleBody>): Promise<RoleSelect> {
+  async update(id: number, data: Partial<RoleInsert>): Promise<RoleSelect> {
     const [role] = await db
       .update(schema.roles)
       .set(data)

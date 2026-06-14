@@ -2,19 +2,19 @@ import { Elysia } from "elysia";
 import { context } from "@/context";
 import { IdParamsSchema } from "@/api/shared/http.model";
 import {
+  UserInsertSchema,
   UserSelectSchema,
-  HttpUsersListResponseSchema,
-  HttpUserPostBodySchema,
-  HttpUsersQuerySchema,
+  UsersListSelectSchema,
+  UsersQuerySchema,
 } from "./users.model";
 import { UsersServiceSingleton } from "./users.service";
 
 export const usersController = new Elysia({ prefix: "users" })
   .use(context)
   .get("", async ({ query }) => UsersServiceSingleton.findAll(query), {
-    query: HttpUsersQuerySchema,
+    query: UsersQuerySchema,
     response: {
-      200: HttpUsersListResponseSchema,
+      200: UsersListSelectSchema,
     },
   })
   .get(
@@ -29,7 +29,7 @@ export const usersController = new Elysia({ prefix: "users" })
     },
   )
   .post("", async ({ body }) => UsersServiceSingleton.create(body), {
-    body: HttpUserPostBodySchema,
+    body: UserInsertSchema,
     response: {
       200: UserSelectSchema,
     },
@@ -40,7 +40,7 @@ export const usersController = new Elysia({ prefix: "users" })
     async ({ params: { id }, body }) => UsersServiceSingleton.update(id, body),
     {
       params: IdParamsSchema,
-      body: HttpUserPostBodySchema.partial(),
+      body: UserInsertSchema.partial(),
       response: {
         200: UserSelectSchema,
         404: "error",

@@ -1,6 +1,16 @@
 import { z } from "zod";
-import { schema } from "@/db";
 import { listResponseSchema } from "@/api/shared/http.model";
+
+export const UserInsertSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  patronymic: z.string().min(1).optional(),
+  email: z.email(),
+  isSendNotify: z.boolean(),
+  password: z.string().min(1),
+  // external
+  roleIds: z.int().min(1).array().optional(),
+});
 
 export const UserSelectSchema = z.object({
   id: z.int().min(1),
@@ -18,32 +28,18 @@ export const UserSelectSchema = z.object({
     .array(),
 });
 
-export type UserSelect = z.infer<typeof UserSelectSchema>;
+export const UsersListSelectSchema = listResponseSchema(UserSelectSchema);
 
-export type UserInsert = typeof schema.users.$inferInsert;
-
-export const HttpUserPostBodySchema = z.object({
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-  patronymic: z.string().optional(),
-  email: z.email(),
-  isSendNotify: z.boolean(),
-  password: z.string().min(1),
-  roleIds: z.int().min(1).array().optional(),
-});
-
-export const HttpUsersListResponseSchema = listResponseSchema(
-  UserSelectSchema,
-);
-
-export const HttpUsersQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(20),
+export const UsersQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z.enum(["id", "firstName", "lastName", "email"]).default("id"),
   sortOrder: z.enum(["asc", "desc"]).default("asc"),
-  email: z.string().optional(),
-  name: z.string().optional(),
+  email: z.string().min(1).optional(),
+  name: z.string().min(1).optional(),
 });
 
-export type HttpUserPostBody = z.infer<typeof HttpUserPostBodySchema>;
-export type HttpUsersQuery = z.infer<typeof HttpUsersQuerySchema>;
+export type UserInsert = z.infer<typeof UserInsertSchema>;
+export type UserSelect = z.infer<typeof UserSelectSchema>;
+export type UsersListSelect = z.infer<typeof UsersListSelectSchema>;
+export type UsersQuery = z.infer<typeof UsersQuerySchema>;

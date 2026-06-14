@@ -2,19 +2,19 @@ import { Elysia } from "elysia";
 import { context } from "@/context";
 import { IdParamsSchema } from "@/api/shared/http.model";
 import {
-  HttpRoleBodySchema,
-  HttpRolesListResponseSchema,
-  HttpRoleResponseSchema,
-  HttpRolesQuerySchema,
+  RoleInsertSchema,
+  RoleSelectSchema,
+  RolesListSelectSchema,
+  RolesQuerySchema,
 } from "./roles.model";
 import { RolesServiceSingleton } from "./roles.service";
 
 export const rolesController = new Elysia({ prefix: "roles" })
   .use(context)
   .get("", async ({ query }) => RolesServiceSingleton.findAll(query), {
-    query: HttpRolesQuerySchema,
+    query: RolesQuerySchema,
     response: {
-      200: HttpRolesListResponseSchema,
+      200: RolesListSelectSchema,
     },
   })
   .get(
@@ -23,15 +23,15 @@ export const rolesController = new Elysia({ prefix: "roles" })
     {
       params: IdParamsSchema,
       response: {
-        200: HttpRoleResponseSchema,
+        200: RoleSelectSchema,
         404: "error",
       },
     },
   )
   .post("", async ({ body }) => RolesServiceSingleton.create(body), {
-    body: HttpRoleBodySchema,
+    body: RoleInsertSchema,
     response: {
-      200: HttpRoleResponseSchema,
+      200: RoleSelectSchema,
     },
     auth: "админ",
   })
@@ -40,9 +40,9 @@ export const rolesController = new Elysia({ prefix: "roles" })
     async ({ params: { id }, body }) => RolesServiceSingleton.update(id, body),
     {
       params: IdParamsSchema,
-      body: HttpRoleBodySchema.partial(),
+      body: RoleInsertSchema.partial(),
       response: {
-        200: HttpRoleResponseSchema,
+        200: RoleSelectSchema,
         404: "error",
       },
       auth: "админ",
@@ -54,7 +54,7 @@ export const rolesController = new Elysia({ prefix: "roles" })
     {
       params: IdParamsSchema,
       response: {
-        200: HttpRoleResponseSchema,
+        200: RoleSelectSchema,
         404: "error",
       },
       auth: "админ",

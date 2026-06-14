@@ -1,9 +1,9 @@
 import type {
-  HttpUserPostBody,
-  HttpUsersQuery,
+  UserInsert,
   UserSelect,
+  UsersListSelect,
+  UsersQuery,
 } from "./users.model";
-import type { ListResponse } from "@/api/shared/http.model";
 import { count, and, asc, desc, eq, like, or } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { HttpError } from "@/error";
@@ -39,7 +39,7 @@ const toResponse = (user: UserSelectInternal): UserSelect => ({
 const NotFoundError = new HttpError(404, "Пользователь не найден");
 
 class UsersService {
-  async findAll(query: HttpUsersQuery): Promise<ListResponse<UserSelect>> {
+  async findAll(query: UsersQuery): Promise<UsersListSelect> {
     const orderColumn = schema.users[query.sortBy];
     const orderBy =
       query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);
@@ -85,7 +85,7 @@ class UsersService {
     return toResponse(user);
   }
 
-  async create(data: HttpUserPostBody): Promise<UserSelect> {
+  async create(data: UserInsert): Promise<UserSelect> {
     const { roleIds = [], password, ...userData } = data;
     const passwordHash = await argon2.hash(password);
 
@@ -112,7 +112,7 @@ class UsersService {
 
   async update(
     id: number,
-    data: Partial<HttpUserPostBody>,
+    data: Partial<UserInsert>,
   ): Promise<UserSelect> {
     const { roleIds, password, ...rest } = data;
     await this.findById(id);
