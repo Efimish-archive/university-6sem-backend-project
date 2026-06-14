@@ -21,20 +21,20 @@
 
 цена и время, это VO, при GET запросе на услугу, в ответе должно быть примерно такое
 
-```
+```yaml
 GET /services/1
 {
-	id: 1,
-	name: "Мойка окон",
-	price: {
-	 minValue: 100,
-	 maxValue: 1,
-	 format: "1 руб."
-	},
-	time: {
-	 second: 600,
-	 minute: 10,
-	},
+  id: 1,
+  name: "Мойка окон",
+  price: {
+    minValue: 100,
+    maxValue: 1,
+    format: "1 руб."
+  },
+  time: {
+    second: 600,
+    minute: 10
+  }
 }
 ```
 
@@ -63,37 +63,37 @@ start_date — это текущая дата
 
 Пример
 
-```
+```yaml
 GET /order/1
 {
-	id: 1,
-	status: 1,
-	start_date: '2024-10-10 12:00:00',
-	end_date: '2024-10-10 12:40:00',
-	totalTime: 30 // минуты
-	totalPrice: 500 // рублей
-	administrator: {
-		id: 10,
-		fullName: "Иван Иванов Иванович"
-	},
-	employee: {
-		id: 11,
-		fullName: "Иван Иванов Иванович",
-	},
-	customerCar: {
-		id: 2,
-		year: 2020,
-		number: "23424",
-		customer: {
-			id: 3,
-			fullName: "Иван Иванов Иванович",
-			email: "test@gm.com"
-		},
-		car: {
-			model: "A3"
-			brand: "Audi"
-		}
-	}
+  id: 1,
+  status: 1,
+  start_date: '2024-10-10 12:00:00',
+  end_date: '2024-10-10 12:40:00',
+  totalTime: 30, // минуты
+  totalPrice: 500, // рублей
+  administrator: {
+    id: 10,
+    fullName: "Иван Иванов Иванович"
+  },
+  employee: {
+    id: 11,
+    fullName: "Иван Иванов Иванович",
+  },
+  customerCar: {
+    id: 2,
+    year: 2020,
+    number: "23424",
+    customer: {
+      id: 3,
+      fullName: "Иван Иванов Иванович",
+      email: "test@gm.com"
+    },
+    car: {
+      model: "A3",
+      brand: "Audi"
+    }
+  }
 }
 ```
 
@@ -119,7 +119,7 @@ GET /order/1
 - в работе
 - завершен
 
-Если у клиента поле is_send_notify в true, значит после завершения заказа отправить письмо
+Если у клиента поле `is_send_notify` в true, значит после завершения заказа отправить письмо
 
 Используем сервисный слой, т.е данные получили и куда-то их передаем. Контролер только получает request и возвращает response
 
