@@ -1,6 +1,6 @@
 services:
   mailpit:
-    image: docker.io/axllent/mailpit
+    image: ghcr.io/axllent/mailpit
     container_name: mailpit
     restart: unless-stopped
     ports:
