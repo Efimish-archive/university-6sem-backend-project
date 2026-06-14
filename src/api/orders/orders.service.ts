@@ -143,21 +143,35 @@ class OrdersService {
     const orderColumn = schema.orders[query.sortBy];
     const orderBy =
       query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);
+    const customerCarSubquery = db
+      .select({ id: schema.customerCars.id })
+      .from(schema.customerCars)
+      .where(eq(schema.customerCars.customerId, userId));
     const where = and(
-      query.status ? eq(schema.orders.status, query.status) : undefined,
+      typeof query.status !== "undefined"
+        ? eq(schema.orders.status, query.status)
+        : undefined,
       userRole === "админ"
         ? and(
             query.employeeId
               ? eq(schema.orders.employeeId, query.employeeId)
               : undefined,
             query.customerId
-              ? eq(schema.customerCars.customerId, query.customerId)
+              ? inArray(
+                  schema.orders.customerCarId,
+                  db
+                    .select({ id: schema.customerCars.id })
+                    .from(schema.customerCars)
+                    .where(
+                      eq(schema.customerCars.customerId, query.customerId),
+                    ),
+                )
               : undefined,
           )
         : userRole === "работник"
           ? eq(schema.orders.employeeId, userId)
           : userRole === "клиент"
-            ? eq(schema.customerCars.customerId, userId)
+            ? inArray(schema.orders.customerCarId, customerCarSubquery)
             : undefined,
     );
 
@@ -174,18 +188,6 @@ class OrdersService {
       .from(schema.orders)
       .where(where);
 
-    // old code
-    // const visibleItems = items
-    //   .filter((order) => this.canView(currentUser, order))
-    //   .filter((order) =>
-    //     isAdmin(currentUser) && query.customerId
-    //       ? order.customerCar.customerId === query.customerId
-    //       : true,
-    //   )
-    //   .slice(offset, offset + limit)
-    //   .map((order) => this.toResponse(order));
-    // old code
-
     return {
       data: orders.map(toResponse),
       pagination: {
@@ -201,23 +203,22 @@ class OrdersService {
     userRole: UserRole,
     id: number,
   ): Promise<OrderSelect> {
+    const customerCarSubquery = db
+      .select({ id: schema.customerCars.id })
+      .from(schema.customerCars)
+      .where(eq(schema.customerCars.customerId, userId));
     const where =
       userRole === "работник"
         ? eq(schema.orders.employeeId, userId)
         : userRole === "клиент"
-          ? eq(schema.customerCars.customerId, userId)
+          ? inArray(schema.orders.customerCarId, customerCarSubquery)
           : undefined;
-
     const order = await db.query.orders.findFirst({
       ...baseQuery,
       where: and(where, eq(schema.users.id, id)),
     });
     if (!order) throw NotFoundError;
     return toResponse(order);
-    // const order = await this.findOrderDetails(id);
-    // if (!order) throw NotFoundError;
-    // this.requireCanView(currentUser, order);
-    // return this.toResponse(order);
   }
 
   private async findById(id: number): Promise<OrderSelect> {
