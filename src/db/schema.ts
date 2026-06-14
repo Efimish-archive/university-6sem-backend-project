@@ -1,5 +1,6 @@
 import { sqliteTable, int, text } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
+import { OrderStatus } from "@/api/orders/orders.model";
 
 export const users = sqliteTable("users", {
   id: int().primaryKey(),
@@ -141,7 +142,7 @@ export const orders = sqliteTable("orders", {
   employeeId: int()
     .references(() => users.id)
     .notNull(),
-  status: int().notNull(),
+  status: int().notNull().$type<OrderStatus>(),
   startDate: int({ mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),

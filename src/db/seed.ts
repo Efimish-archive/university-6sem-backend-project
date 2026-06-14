@@ -117,10 +117,10 @@ for (let i = 0; i < 50; i++) {
     (sum, service) => sum + service.price,
     0,
   );
-  const status = fakerRU.helpers.arrayElement([1, 1, 1, 2]);
+  const status = fakerRU.helpers.arrayElement([0, 0, 0, 1]);
   const startedMinutesAgo = fakerRU.number.int({
-    min: status === 2 ? 180 : 15,
-    max: status === 2 ? 60 * 24 * 14 : 240,
+    min: status === 1 ? 180 : 15,
+    max: status === 1 ? 60 * 24 * 14 : 240,
   });
   const startDate = new Date(Date.now() - startedMinutesAgo * 60 * 1000);
   const endDate = new Date(startDate.getTime() + totalSeconds * 1000);
