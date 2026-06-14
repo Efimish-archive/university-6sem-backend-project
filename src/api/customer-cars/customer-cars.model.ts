@@ -1,38 +1,24 @@
 import { z } from "zod";
+import { CarSelectSchema } from "@/api/cars/cars.model";
+import { UserSelectSchema } from "@/api/users/users.model";
 import { listResponseSchema } from "@/api/shared/http.model";
 
 export const CustomerCarInsertSchema = z.object({
+  // external
   carId: z.int().min(1),
+  // external
   customerId: z.int().min(1),
-  year: z.int().min(1900).max(new Date().getFullYear()),
+  year: z.int().min(1886),
   number: z.string().min(1),
 });
 
 export const CustomerCarSelectSchema = z.object({
   id: z.int().min(1),
-  car: z.object({
-    id: z.int().min(1),
-    brand: z.object({
-      id: z.int().min(1),
-      name: z.string().min(1),
-    }),
-    model: z.string().min(1),
-  }),
-  customer: z.object({
-    id: z.int().min(1),
-    firstName: z.string().min(1),
-    lastName: z.string().min(1),
-    patronymic: z.string().min(1).nullable(),
-    email: z.string(),
-    isSendNotify: z.boolean(),
-    roles: z
-      .object({
-        id: z.int().min(1),
-        name: z.string(),
-      })
-      .array(),
-  }),
-  year: z.int().min(1900).max(new Date().getFullYear()),
+  // external
+  car: CarSelectSchema,
+  // external
+  customer: UserSelectSchema,
+  year: z.int().min(1886),
   number: z.string().min(1),
 });
 
@@ -52,5 +38,7 @@ export const CustomerCarsQuerySchema = z.object({
 
 export type CustomerCarInsert = z.infer<typeof CustomerCarInsertSchema>;
 export type CustomerCarSelect = z.infer<typeof CustomerCarSelectSchema>;
-export type CustomerCarsListSelect = z.infer<typeof CustomerCarsListSelectSchema>;
+export type CustomerCarsListSelect = z.infer<
+  typeof CustomerCarsListSelectSchema
+>;
 export type CustomerCarsQuery = z.infer<typeof CustomerCarsQuerySchema>;

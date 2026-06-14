@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { schema } from "@/db";
 import { listResponseSchema } from "@/api/shared/http.model";
 
 export const BrandInsertSchema = z.object({

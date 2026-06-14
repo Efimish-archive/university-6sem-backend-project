@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RoleSelectSchema } from "@/api/roles/roles.model";
 import { listResponseSchema } from "@/api/shared/http.model";
 
 export const UserInsertSchema = z.object({
@@ -20,12 +21,7 @@ export const UserSelectSchema = z.object({
   email: z.string(),
   isSendNotify: z.boolean(),
   // external
-  roles: z
-    .object({
-      id: z.int().min(1),
-      name: z.string().min(1),
-    })
-    .array(),
+  roles: RoleSelectSchema.array(),
 });
 
 export const UsersListSelectSchema = listResponseSchema(UserSelectSchema);

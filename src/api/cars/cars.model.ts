@@ -1,17 +1,17 @@
 import { z } from "zod";
+import { BrandSelectSchema } from "@/api/brands/brands.model";
 import { listResponseSchema } from "@/api/shared/http.model";
 
 export const CarInsertSchema = z.object({
+  // external
   brandId: z.int().min(1),
   model: z.string().min(1),
 });
 
 export const CarSelectSchema = z.object({
   id: z.int().min(1),
-  brand: z.object({
-    id: z.int().min(1),
-    name: z.string().min(1),
-  }),
+  // external
+  brand: BrandSelectSchema,
   model: z.string().min(1),
 });
 
