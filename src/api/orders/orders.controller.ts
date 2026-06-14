@@ -1,15 +1,12 @@
 import { Elysia } from "elysia";
 import { context } from "@/context";
-import { AuthServiceSingleton } from "@/api/shared/auth.service";
-import { AuthHeadersSchema, IdParamsSchema } from "@/api/shared/http.model";
+import { IdParamsSchema, paginateSchema } from "@/api/shared/model";
 import {
-  HttpOrderCreateBodySchema,
-  HttpOrdersListResponseSchema,
-  HttpOrderResponseSchema,
-  HttpOrderServicesBodySchema,
-  HttpOrderStatusBodySchema,
-  HttpOrderUpdateBodySchema,
-  HttpOrdersQuerySchema,
+  OrderInsertSchema,
+  OrderSelectSchema,
+  OrderQuerySchema,
+  OrderUpdateStatusSchema,
+  OrderAddServicesSchema,
 } from "./orders.model";
 import { OrdersServiceSingleton } from "./orders.service";
 
@@ -17,138 +14,103 @@ export const ordersController = new Elysia({ prefix: "orders" })
   .use(context)
   .get(
     "",
-    async ({ query, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return OrdersServiceSingleton.findAll(currentUser, query);
-    },
+    async ({ query, auth }) =>
+      OrdersServiceSingleton.findAllProtected(
+        Number(auth.sub),
+        auth.role,
+        query,
+      ),
     {
-      headers: AuthHeadersSchema,
-      query: HttpOrdersQuerySchema,
+      query: OrderQuerySchema,
       response: {
-        200: HttpOrdersListResponseSchema,
-        401: "error",
-        403: "error",
+        200: paginateSchema(OrderSelectSchema),
       },
+      auth: ["клиент", "работник", "админ"],
     },
   )
   .get(
     "/:id",
-    async ({ params: { id }, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
+    async ({ params: { id }, auth }) => {
+      return OrdersServiceSingleton.findByIdProtected(
+        Number(auth.sub),
+        auth.role,
+        id,
       );
-      return OrdersServiceSingleton.findById(currentUser, id);
     },
     {
-      headers: AuthHeadersSchema,
       params: IdParamsSchema,
       response: {
-        200: HttpOrderResponseSchema,
-        401: "error",
-        403: "error",
+        200: OrderSelectSchema,
         404: "error",
       },
+      auth: ["клиент", "работник", "админ"],
     },
   )
   .post(
     "",
-    async ({ body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return OrdersServiceSingleton.create(currentUser, body);
-    },
+    async ({ body, auth }) =>
+      OrdersServiceSingleton.create(Number(auth.sub), body),
     {
-      headers: AuthHeadersSchema,
-      body: HttpOrderCreateBodySchema,
+      body: OrderInsertSchema,
       response: {
-        200: HttpOrderResponseSchema,
-        401: "error",
-        403: "error",
+        200: OrderSelectSchema,
       },
+      auth: "админ",
     },
   )
   .put(
     "/:id",
-    async ({ params: { id }, body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return OrdersServiceSingleton.update(currentUser, id, body);
-    },
+    async ({ params: { id }, body }) => OrdersServiceSingleton.update(id, body),
     {
-      headers: AuthHeadersSchema,
       params: IdParamsSchema,
-      body: HttpOrderUpdateBodySchema,
+      body: OrderInsertSchema.partial(),
       response: {
-        200: HttpOrderResponseSchema,
-        401: "error",
-        403: "error",
+        200: OrderSelectSchema,
         404: "error",
         409: "error",
       },
-    },
-  )
-  .patch(
-    "/:id/status",
-    async ({ params: { id }, body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return OrdersServiceSingleton.updateStatus(currentUser, id, body);
-    },
-    {
-      headers: AuthHeadersSchema,
-      params: IdParamsSchema,
-      body: HttpOrderStatusBodySchema,
-      response: {
-        200: HttpOrderResponseSchema,
-        401: "error",
-        403: "error",
-        404: "error",
-        409: "error",
-      },
-    },
-  )
-  .post(
-    "/:id/services",
-    async ({ params: { id }, body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return OrdersServiceSingleton.addServices(currentUser, id, body);
-    },
-    {
-      headers: AuthHeadersSchema,
-      params: IdParamsSchema,
-      body: HttpOrderServicesBodySchema,
-      response: {
-        200: HttpOrderResponseSchema,
-        401: "error",
-        403: "error",
-        404: "error",
-        409: "error",
-      },
+      auth: "админ",
     },
   )
   .delete(
     "/:id",
-    async ({ params: { id }, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return OrdersServiceSingleton.delete(currentUser, id);
-    },
+    async ({ params: { id } }) => OrdersServiceSingleton.delete(id),
     {
-      headers: AuthHeadersSchema,
       params: IdParamsSchema,
       response: {
-        200: HttpOrderResponseSchema,
-        401: "error",
-        403: "error",
+        200: OrderSelectSchema,
         404: "error",
       },
+      auth: "админ",
+    },
+  )
+  .patch(
+    "/:id/status",
+    async ({ params: { id }, body }) =>
+      OrdersServiceSingleton.updateStatus(id, body),
+    {
+      params: IdParamsSchema,
+      body: OrderUpdateStatusSchema,
+      response: {
+        200: OrderSelectSchema,
+        404: "error",
+        409: "error",
+      },
+      auth: "админ",
+    },
+  )
+  .post(
+    "/:id/services",
+    async ({ params: { id }, body }) =>
+      OrdersServiceSingleton.addServices(id, body),
+    {
+      params: IdParamsSchema,
+      body: OrderAddServicesSchema,
+      response: {
+        200: OrderSelectSchema,
+        404: "error",
+        409: "error",
+      },
+      auth: "админ",
     },
   );

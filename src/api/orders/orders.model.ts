@@ -1,39 +1,41 @@
 import { z } from "zod";
-import { schema } from "@/db";
-import { HttpDateSchema, listResponseSchema } from "@/api/shared/http.model";
+import { UserSelectSchema } from "@/api/users/users.model";
+import { CustomerCarSelectSchema } from "@/api/customer-cars/customer-cars.model";
+import { ServiceSelectSchema } from "@/api/services/services.model";
 
-export type OrderSelect = typeof schema.orders.$inferSelect;
-
-export const ORDER_STATUS = {
-  inProgress: 1,
-  completed: 2,
-} as const;
-
-export const HttpOrderCreateBodySchema = z.object({
-  customerCarId: z.number().int().positive(),
-  employeeId: z.number().int().positive(),
-  serviceIds: z.array(z.number().int().positive()).min(1),
+export const OrderInsertSchema = z.object({
+  // external
+  customerCarId: z.int().min(1),
+  // external
+  employeeId: z.int().min(1),
+  // external
+  serviceIds: z.int().min(1).array().min(1),
 });
 
-export const HttpOrderUpdateBodySchema = z.object({
-  customerCarId: z.number().int().positive().optional(),
-  employeeId: z.number().int().positive().optional(),
+export const OrderSelectSchema = z.object({
+  id: z.int().min(1),
+  // external
+  administrator: UserSelectSchema,
+  // external
+  customerCar: CustomerCarSelectSchema,
+  // external
+  employee: UserSelectSchema,
+  status: z.int().min(0).max(1),
+  startDate: z.iso.datetime(),
+  endDate: z.iso.datetime(),
+  totalPrice: z.int().min(0),
+  // external
+  services: ServiceSelectSchema.array(),
 });
 
-export const HttpOrderStatusBodySchema = z.object({
-  status: z.union([
-    z.literal(ORDER_STATUS.inProgress),
-    z.literal(ORDER_STATUS.completed),
-  ]),
-});
+export enum OrderStatus {
+  "в работе",
+  "завершен",
+}
 
-export const HttpOrderServicesBodySchema = z.object({
-  serviceIds: z.array(z.number().int().positive()).min(1),
-});
-
-export const HttpOrdersQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(20),
+export const OrderQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z
     .enum(["id", "status", "startDate", "endDate", "totalPrice"])
     .default("id"),
@@ -41,71 +43,26 @@ export const HttpOrdersQuerySchema = z.object({
   status: z.coerce
     .number()
     .int()
-    .refine(
-      (status) =>
-        status === ORDER_STATUS.inProgress || status === ORDER_STATUS.completed,
-    )
+    .min(OrderStatus["в работе"])
+    .max(OrderStatus["завершен"])
     .optional(),
-  employeeId: z.coerce.number().int().positive().optional(),
-  customerId: z.coerce.number().int().positive().optional(),
+  employeeId: z.coerce.number().int().min(1).optional(),
+  customerId: z.coerce.number().int().min(1).optional(),
 });
 
-export const HttpOrderResponseSchema = z.object({
-  id: z.number().int(),
-  status: z.number().int(),
-  startDate: HttpDateSchema,
-  endDate: HttpDateSchema.nullable(),
-  totalTime: z.number().int(),
-  totalPrice: z.number(),
-  administrator: z.object({
-    id: z.number().int(),
-    fullName: z.string(),
-  }),
-  employee: z.object({
-    id: z.number().int(),
-    fullName: z.string(),
-  }),
-  services: z.array(
-    z.object({
-      id: z.number().int(),
-      name: z.string(),
-      price: z.object({
-        rubles: z.number(),
-        kopecks: z.number(),
-        format: z.string(),
-      }),
-      time: z.object({
-        second: z.number().int(),
-        minute: z.number().int(),
-      }),
-    }),
-  ),
-  customerCar: z.object({
-    id: z.number().int(),
-    year: z.number().int().nullable(),
-    number: z.string().nullable(),
-    customer: z
-      .object({
-        id: z.number().int(),
-        fullName: z.string(),
-        email: z.string(),
-      })
-      .nullable(),
-    car: z
-      .object({
-        model: z.string(),
-        brand: z.string(),
-      })
-      .nullable(),
-  }),
+export type OrderInsert = z.infer<typeof OrderInsertSchema>;
+export type OrderSelect = z.infer<typeof OrderSelectSchema>;
+export type OrderQuery = z.infer<typeof OrderQuerySchema>;
+
+// Additional
+
+export const OrderUpdateStatusSchema = z.object({
+  status: z.enum(OrderStatus),
 });
 
-export const HttpOrdersListResponseSchema = listResponseSchema(
-  HttpOrderResponseSchema,
-);
+export const OrderAddServicesSchema = z.object({
+  serviceIds: z.int().min(1).array().min(1),
+});
 
-export type HttpOrderCreateBody = z.infer<typeof HttpOrderCreateBodySchema>;
-export type HttpOrderUpdateBody = z.infer<typeof HttpOrderUpdateBodySchema>;
-export type HttpOrderStatusBody = z.infer<typeof HttpOrderStatusBodySchema>;
-export type HttpOrderServicesBody = z.infer<typeof HttpOrderServicesBodySchema>;
-export type HttpOrdersQuery = z.infer<typeof HttpOrdersQuerySchema>;
+export type OrderUpdateStatus = z.infer<typeof OrderUpdateStatusSchema>;
+export type OrderAddServices = z.infer<typeof OrderAddServicesSchema>;
