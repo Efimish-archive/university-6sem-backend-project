@@ -1,6 +1,6 @@
 export type MoneyVo = {
-  kopecks: number;
   rubles: number;
+  kopecks: number;
   format: string;
 };
 
@@ -9,18 +9,18 @@ export type TimeVo = {
   minute: number;
 };
 
-export const rublesToKopecks = (rubles: number) => Math.round(rubles * 100);
-export const kopecksToRubles = (kopecks: number) => kopecks / 100;
+export const rublesToKopecks = (rubles: number) => Math.floor(rubles * 100);
+export const kopecksToRubles = (kopecks: number) => Math.floor(kopecks / 100);
 
-export const minutesToSeconds = (minutes: number) => minutes * 60;
-export const secondsToMinutes = (seconds: number) => Math.round(seconds / 60);
+export const minutesToSeconds = (minutes: number) => Math.floor(minutes * 60);
+export const secondsToMinutes = (seconds: number) => Math.floor(seconds / 60);
 
 export const moneyVo = (kopecks: number): MoneyVo => {
   const rubles = kopecksToRubles(kopecks);
 
   return {
-    kopecks: kopecks,
     rubles: rubles,
+    kopecks: kopecks,
     format: `${rubles} руб.`,
   };
 };

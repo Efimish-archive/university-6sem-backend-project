@@ -1,21 +1,20 @@
 import { Elysia } from "elysia";
 import { context } from "@/context";
-import { AuthServiceSingleton } from "@/api/shared/auth.service";
-import { AuthHeadersSchema, IdParamsSchema } from "@/api/shared/http.model";
+import { IdParamsSchema } from "@/api/shared/http.model";
 import {
-  HttpServiceBodySchema,
-  HttpServicesListResponseSchema,
-  HttpServiceResponseSchema,
-  HttpServicesQuerySchema,
+  ServiceInsertSchema,
+  ServiceSelectSchema,
+  ServicesListSelectSchema,
+  ServicesQuerySchema,
 } from "./services.model";
 import { ServicesServiceSingleton } from "./services.service";
 
 export const servicesController = new Elysia({ prefix: "services" })
   .use(context)
   .get("", async ({ query }) => ServicesServiceSingleton.findAll(query), {
-    query: HttpServicesQuerySchema,
+    query: ServicesQuerySchema,
     response: {
-      200: HttpServicesListResponseSchema,
+      200: ServicesListSelectSchema,
     },
   })
   .get(
@@ -24,65 +23,41 @@ export const servicesController = new Elysia({ prefix: "services" })
     {
       params: IdParamsSchema,
       response: {
-        200: HttpServiceResponseSchema,
+        200: ServiceSelectSchema,
         404: "error",
       },
     },
   )
-  .post(
-    "",
-    async ({ body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return ServicesServiceSingleton.create(currentUser, body);
+  .post("", async ({ body }) => ServicesServiceSingleton.create(body), {
+    body: ServiceInsertSchema,
+    response: {
+      200: ServiceSelectSchema,
     },
-    {
-      headers: AuthHeadersSchema,
-      body: HttpServiceBodySchema,
-      response: {
-        200: HttpServiceResponseSchema,
-        401: "error",
-        403: "error",
-      },
-    },
-  )
+    auth: "админ",
+  })
   .put(
     "/:id",
-    async ({ params: { id }, body, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return ServicesServiceSingleton.update(currentUser, id, body);
-    },
+    async ({ params: { id }, body }) =>
+      ServicesServiceSingleton.update(id, body),
     {
-      headers: AuthHeadersSchema,
       params: IdParamsSchema,
-      body: HttpServiceBodySchema.partial(),
+      body: ServiceInsertSchema.partial(),
       response: {
-        200: HttpServiceResponseSchema,
-        401: "error",
-        403: "error",
+        200: ServiceSelectSchema,
         404: "error",
       },
+      auth: "админ",
     },
   )
   .delete(
     "/:id",
-    async ({ params: { id }, headers }) => {
-      const currentUser = await AuthServiceSingleton.getCurrentUser(
-        headers["x-user-id"],
-      );
-      return ServicesServiceSingleton.delete(currentUser, id);
-    },
+    async ({ params: { id } }) => ServicesServiceSingleton.delete(id),
     {
-      headers: AuthHeadersSchema,
       params: IdParamsSchema,
       response: {
-        200: HttpServiceResponseSchema,
-        401: "error",
-        403: "error",
+        200: ServiceSelectSchema,
         404: "error",
       },
+      auth: "админ",
     },
   );
