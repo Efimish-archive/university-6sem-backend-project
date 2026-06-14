@@ -14,16 +14,16 @@ export const UserInsertSchema = z.object({
 
 export const UserSelectSchema = z.object({
   id: z.int().min(1),
-  firstName: z.string(),
-  lastName: z.string(),
-  patronymic: z.string().nullable(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  patronymic: z.string().min(1).nullable(),
   email: z.string(),
   isSendNotify: z.boolean(),
   // external
   roles: z
     .object({
       id: z.int().min(1),
-      name: z.string(),
+      name: z.string().min(1),
     })
     .array(),
 });

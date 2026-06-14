@@ -25,6 +25,7 @@ const users = await db
       return {
         firstName,
         lastName,
+        patronymic: fakerRU.person.middleName(sex),
         email: fakerRU.internet.email({ firstName, lastName }),
         isSendNotify: fakerRU.datatype.boolean({ probability: 0.7 }),
         passwordHash,
