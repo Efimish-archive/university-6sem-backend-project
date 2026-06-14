@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { listResponseSchema } from "@/api/shared/http.model";
 
 export const RoleInsertSchema = z.object({
   name: z.string().min(1),
@@ -10,9 +9,7 @@ export const RoleSelectSchema = z.object({
   name: z.string().min(1),
 });
 
-export const RolesListSelectSchema = listResponseSchema(RoleSelectSchema);
-
-export const RolesQuerySchema = z.object({
+export const RoleQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z.enum(["id", "name"]).default("id"),
@@ -22,5 +19,4 @@ export const RolesQuerySchema = z.object({
 
 export type RoleInsert = z.infer<typeof RoleInsertSchema>;
 export type RoleSelect = z.infer<typeof RoleSelectSchema>;
-export type RolesListSelect = z.infer<typeof RolesListSelectSchema>;
-export type RolesQuery = z.infer<typeof RolesQuerySchema>;
+export type RoleQuery = z.infer<typeof RoleQuerySchema>;

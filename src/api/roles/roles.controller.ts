@@ -1,20 +1,19 @@
 import { Elysia } from "elysia";
 import { context } from "@/context";
-import { IdParamsSchema } from "@/api/shared/http.model";
+import { IdParamsSchema, paginateSchema } from "@/api/shared/model";
 import {
   RoleInsertSchema,
   RoleSelectSchema,
-  RolesListSelectSchema,
-  RolesQuerySchema,
+  RoleQuerySchema,
 } from "./roles.model";
 import { RolesServiceSingleton } from "./roles.service";
 
 export const rolesController = new Elysia({ prefix: "roles" })
   .use(context)
   .get("", async ({ query }) => RolesServiceSingleton.findAll(query), {
-    query: RolesQuerySchema,
+    query: RoleQuerySchema,
     response: {
-      200: RolesListSelectSchema,
+      200: paginateSchema(RoleSelectSchema),
     },
   })
   .get(

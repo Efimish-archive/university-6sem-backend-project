@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { BrandSelectSchema } from "@/api/brands/brands.model";
-import { listResponseSchema } from "@/api/shared/http.model";
 
 export const CarInsertSchema = z.object({
   // external
@@ -15,9 +14,8 @@ export const CarSelectSchema = z.object({
   model: z.string().min(1),
 });
 
-export const CarsListSelectSchema = listResponseSchema(CarSelectSchema);
 
-export const CarsQuerySchema = z.object({
+export const CarQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z.enum(["id", "model"]).default("id"),
@@ -28,5 +26,4 @@ export const CarsQuerySchema = z.object({
 
 export type CarInsert = z.infer<typeof CarInsertSchema>;
 export type CarSelect = z.infer<typeof CarSelectSchema>;
-export type CarsListSelect = z.infer<typeof CarsListSelectSchema>;
-export type CarsQuery = z.infer<typeof CarsQuerySchema>;
+export type CarQuery = z.infer<typeof CarQuerySchema>;

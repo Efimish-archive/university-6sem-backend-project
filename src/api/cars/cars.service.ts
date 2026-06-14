@@ -1,9 +1,6 @@
-import type {
-  CarInsert,
-  CarSelect,
-  CarsListSelect,
-  CarsQuery,
-} from "./cars.model";
+import type { CarInsert, CarSelect, CarQuery } from "./cars.model";
+import type { Service } from "@/api/shared/service";
+import type { Paginated } from "@/api/shared/model";
 import { count, and, asc, desc, eq, like } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { HttpError } from "@/error";
@@ -29,8 +26,8 @@ const toResponse = (car: CarSelectInternal): CarSelect => ({
 
 const NotFoundError = new HttpError(404, "Машина не найдена");
 
-class CarsService {
-  async findAll(query: CarsQuery): Promise<CarsListSelect> {
+class CarsService implements Service<CarInsert, CarSelect, CarQuery> {
+  async findAll(query: CarQuery): Promise<Paginated<CarSelect>> {
     const orderColumn = schema.cars[query.sortBy];
     const orderBy =
       query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);

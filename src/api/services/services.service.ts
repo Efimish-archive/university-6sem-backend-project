@@ -1,9 +1,10 @@
 import type {
   ServiceInsert,
   ServiceSelect,
-  ServicesListSelect,
-  ServicesQuery,
+  ServiceQuery,
 } from "./services.model";
+import type { Service } from "@/api/shared/service";
+import type { Paginated } from "@/api/shared/model";
 import { count, and, asc, desc, eq, gte, like, lte } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { HttpError } from "@/error";
@@ -41,8 +42,12 @@ const toDbValuesPartial = (
 
 const NotFoundError = new HttpError(404, "Услуга не найдена");
 
-class ServicesService {
-  async findAll(query: ServicesQuery): Promise<ServicesListSelect> {
+class ServicesService implements Service<
+  ServiceInsert,
+  ServiceSelect,
+  ServiceQuery
+> {
+  async findAll(query: ServiceQuery): Promise<Paginated<ServiceSelect>> {
     const orderColumn = schema.services[query.sortBy];
     const orderBy =
       query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);

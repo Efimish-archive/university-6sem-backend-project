@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { listResponseSchema } from "@/api/shared/http.model";
 
 export const ServiceInsertSchema = z.object({
   name: z.string().min(1),
@@ -21,9 +20,7 @@ export const ServiceSelectSchema = z.object({
   }),
 });
 
-export const ServicesListSelectSchema = listResponseSchema(ServiceSelectSchema);
-
-export const ServicesQuerySchema = z.object({
+export const ServiceQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   sortBy: z.enum(["id", "name", "price", "time"]).default("id"),
@@ -37,5 +34,4 @@ export const ServicesQuerySchema = z.object({
 
 export type ServiceInsert = z.infer<typeof ServiceInsertSchema>;
 export type ServiceSelect = z.infer<typeof ServiceSelectSchema>;
-export type ServicesListSelect = z.infer<typeof ServicesListSelectSchema>;
-export type ServicesQuery = z.infer<typeof ServicesQuerySchema>;
+export type ServiceQuery = z.infer<typeof ServiceQuerySchema>;

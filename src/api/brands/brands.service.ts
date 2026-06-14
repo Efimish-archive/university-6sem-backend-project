@@ -1,17 +1,14 @@
-import type {
-  BrandInsert,
-  BrandSelect,
-  BrandsListSelect,
-  BrandsQuery,
-} from "./brands.model";
+import type { BrandInsert, BrandSelect, BrandQuery } from "./brands.model";
+import type { Service } from "@/api/shared/service";
+import type { Paginated } from "@/api/shared/model";
 import { count, and, asc, desc, eq, like } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { HttpError } from "@/error";
 
 const NotFoundError = new HttpError(404, "Бренд не найден");
 
-class BrandsService {
-  async findAll(query: BrandsQuery): Promise<BrandsListSelect> {
+class BrandsService implements Service<BrandInsert, BrandSelect, BrandQuery> {
+  async findAll(query: BrandQuery): Promise<Paginated<BrandSelect>> {
     const orderColumn = schema.brands[query.sortBy];
     const orderBy =
       query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);
@@ -54,10 +51,7 @@ class BrandsService {
     return brand;
   }
 
-  async update(
-    id: number,
-    data: Partial<BrandInsert>,
-  ): Promise<BrandSelect> {
+  async update(id: number, data: Partial<BrandInsert>): Promise<BrandSelect> {
     const [brand] = await db
       .update(schema.brands)
       .set(data)

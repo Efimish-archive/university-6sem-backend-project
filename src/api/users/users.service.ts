@@ -1,9 +1,6 @@
-import type {
-  UserInsert,
-  UserSelect,
-  UsersListSelect,
-  UsersQuery,
-} from "./users.model";
+import type { UserInsert, UserSelect, UserQuery } from "./users.model";
+import type { Service } from "@/api/shared/service";
+import type { Paginated } from "@/api/shared/model";
 import { count, and, asc, desc, eq, like, or } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { HttpError } from "@/error";
@@ -38,8 +35,8 @@ const toResponse = (user: UserSelectInternal): UserSelect => ({
 
 const NotFoundError = new HttpError(404, "Пользователь не найден");
 
-class UsersService {
-  async findAll(query: UsersQuery): Promise<UsersListSelect> {
+class UsersService implements Service<UserInsert, UserSelect, UserQuery> {
+  async findAll(query: UserQuery): Promise<Paginated<UserSelect>> {
     const orderColumn = schema.users[query.sortBy];
     const orderBy =
       query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);
@@ -110,10 +107,7 @@ class UsersService {
     return this.findById(user.id);
   }
 
-  async update(
-    id: number,
-    data: Partial<UserInsert>,
-  ): Promise<UserSelect> {
+  async update(id: number, data: Partial<UserInsert>): Promise<UserSelect> {
     const { roleIds, password, ...rest } = data;
     await this.findById(id);
 

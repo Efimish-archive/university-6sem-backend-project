@@ -1,17 +1,14 @@
-import type {
-  RoleInsert,
-  RoleSelect,
-  RolesListSelect,
-  RolesQuery,
-} from "./roles.model";
+import type { RoleInsert, RoleSelect, RoleQuery } from "./roles.model";
+import type { Service } from "@/api/shared/service";
+import type { Paginated } from "@/api/shared/model";
 import { count, and, asc, desc, eq, like } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { HttpError } from "@/error";
 
 const NotFoundError = new HttpError(404, "Роль не найдена");
 
-class RolesService {
-  async findAll(query: RolesQuery): Promise<RolesListSelect> {
+class RolesService implements Service<RoleInsert, RoleSelect, RoleQuery> {
+  async findAll(query: RoleQuery): Promise<Paginated<RoleSelect>> {
     const orderColumn = schema.roles[query.sortBy];
     const orderBy =
       query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);

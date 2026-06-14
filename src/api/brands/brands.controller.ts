@@ -1,20 +1,19 @@
 import { Elysia } from "elysia";
 import { context } from "@/context";
-import { IdParamsSchema } from "@/api/shared/http.model";
+import { IdParamsSchema, paginateSchema } from "@/api/shared/model";
 import {
   BrandInsertSchema,
   BrandSelectSchema,
-  BrandsListSelectSchema,
-  BrandsQuerySchema,
+  BrandQuerySchema,
 } from "./brands.model";
 import { BrandsServiceSingleton } from "./brands.service";
 
 export const brandsController = new Elysia({ prefix: "brands" })
   .use(context)
   .get("", async ({ query }) => BrandsServiceSingleton.findAll(query), {
-    query: BrandsQuerySchema,
+    query: BrandQuerySchema,
     response: {
-      200: BrandsListSelectSchema,
+      200: paginateSchema(BrandSelectSchema),
     },
   })
   .get(

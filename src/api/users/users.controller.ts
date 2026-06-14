@@ -1,20 +1,19 @@
 import { Elysia } from "elysia";
 import { context } from "@/context";
-import { IdParamsSchema } from "@/api/shared/http.model";
+import { IdParamsSchema, paginateSchema } from "@/api/shared/model";
 import {
   UserInsertSchema,
   UserSelectSchema,
-  UsersListSelectSchema,
-  UsersQuerySchema,
+  UserQuerySchema,
 } from "./users.model";
 import { UsersServiceSingleton } from "./users.service";
 
 export const usersController = new Elysia({ prefix: "users" })
   .use(context)
   .get("", async ({ query }) => UsersServiceSingleton.findAll(query), {
-    query: UsersQuerySchema,
+    query: UserQuerySchema,
     response: {
-      200: UsersListSelectSchema,
+      200: paginateSchema(UserSelectSchema),
     },
   })
   .get(

@@ -1,9 +1,10 @@
 import type {
   CustomerCarInsert,
   CustomerCarSelect,
-  CustomerCarsListSelect,
-  CustomerCarsQuery,
+  CustomerCarQuery,
 } from "./customer-cars.model";
+import type { Service } from "@/api/shared/service";
+import type { Paginated } from "@/api/shared/model";
 import { count, and, asc, desc, eq, like } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { HttpError } from "@/error";
@@ -61,8 +62,14 @@ const toResponse = (
 
 const NotFoundError = new HttpError(404, "Машина клиента не найдена");
 
-class CustomerCarsService {
-  async findAll(query: CustomerCarsQuery): Promise<CustomerCarsListSelect> {
+class CustomerCarsService implements Service<
+  CustomerCarInsert,
+  CustomerCarSelect,
+  CustomerCarQuery
+> {
+  async findAll(
+    query: CustomerCarQuery,
+  ): Promise<Paginated<CustomerCarSelect>> {
     const orderColumn = schema.customerCars[query.sortBy];
     const orderBy =
       query.sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);

@@ -1,20 +1,19 @@
 import { Elysia } from "elysia";
 import { context } from "@/context";
-import { IdParamsSchema } from "@/api/shared/http.model";
+import { IdParamsSchema, paginateSchema } from "@/api/shared/model";
 import {
   CustomerCarInsertSchema,
   CustomerCarSelectSchema,
-  CustomerCarsListSelectSchema,
-  CustomerCarsQuerySchema,
+  CustomerCarQuerySchema,
 } from "./customer-cars.model";
 import { CustomerCarsServiceSingleton } from "./customer-cars.service";
 
 export const customerCarsController = new Elysia({ prefix: "customer-cars" })
   .use(context)
   .get("", async ({ query }) => CustomerCarsServiceSingleton.findAll(query), {
-    query: CustomerCarsQuerySchema,
+    query: CustomerCarQuerySchema,
     response: {
-      200: CustomerCarsListSelectSchema,
+      200: paginateSchema(CustomerCarSelectSchema),
     },
   })
   .get(
