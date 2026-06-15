@@ -293,6 +293,10 @@ class OrdersService {
   async updateStatus(id: number, data: OrderUpdateStatus) {
     const oldOrder = await this.findById(id);
 
+    if (oldOrder.status === data.status) {
+      throw new HttpError(400, "Нельзя установить тот же статус");
+    }
+
     if (
       oldOrder.status === OrderStatus["завершен"] &&
       data.status === OrderStatus["в работе"]
